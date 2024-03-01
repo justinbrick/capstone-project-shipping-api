@@ -1,3 +1,6 @@
 /.venv
 # We don't care for frozen files being added to the repo...
 __pycache__ 
+# Remove our database - for dev purposes only.
+*.db
+*.db-journal
