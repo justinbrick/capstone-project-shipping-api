@@ -1,8 +1,6 @@
 from fastapi import APIRouter
 from uuid import UUID
 
-
-
 from ..models.shipment import ShipmentRequest, Shipment, create_shipment
 from ..database import shipments as shipment_db
 
@@ -22,3 +20,4 @@ async def get_shipment_request(shipment_id: UUID) -> Shipment:
 @router.get("/{shipment_id}/status")
 async def get_shipment_status(shipment_id: UUID):
     return "Shipment status."
+
