@@ -21,7 +21,6 @@ def test_create_shipment():
     expected_shipment_id = json["shipment_id"]
 
 def test_get_shipment():
-    print(f"expected_shipment_id: {expected_shipment_id}")
     response = client.get(f"/shipments/{expected_shipment_id}")
     assert response.status_code == 200
     assert response.json()["shipment_id"] == expected_shipment_id
