@@ -22,7 +22,13 @@ class ShipmentRequest(BaseModel):
     shipping_address: str
     provider: str  # This might need to be an enum so the documentation generates the correct options.
 
-
+class ShipmentStatus(BaseModel):
+    """
+    The status of a shipment - due to varying sources of shipment delivery, this must be put into one 
+    unified response. 
+    """
+    order_id: UUID
+    status: str
 
 def create_shipment(request: ShipmentRequest):
     """
