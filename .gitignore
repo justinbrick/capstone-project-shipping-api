@@ -4,3 +4,5 @@ __pycache__
 # Remove our database - for dev purposes only.
 *.db
 *.db-journal
+# Remove cache from tests
+.pytest_cache
