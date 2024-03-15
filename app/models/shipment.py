@@ -11,6 +11,7 @@ class Shipment(BaseModel):
     shipping_address: str
     provider: str
     provider_shipment_id: str
+    customer_id: str
 
         
 class ShipmentRequest(BaseModel):

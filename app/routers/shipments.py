@@ -3,15 +3,18 @@ from uuid import UUID
 
 from ..models.shipment import ShipmentRequest, Shipment, create_shipment
 from ..database import shipments as shipment_db
-from ..database import ColumnNotFoundException
+from ..database import ColumnNotFoundException, ColumnInsertionException
 
 router = APIRouter()
 
 @router.post("/")
 async def create_shipment_request(request: ShipmentRequest) -> Shipment:
-    shipment = create_shipment(request)
-    shipment_db.save_shipment(shipment)
-    return shipment
+    try:
+        shipment = create_shipment(request)
+        shipment_db.save_shipment(shipment)
+        return shipment
+    except ColumnInsertionException:
+        raise HTTPException(status_code=500, detail=f"There was an error creating your shipment.")
 
 @router.get("/{shipment_id}")
 async def get_shipment_request(shipment_id: UUID) -> Shipment:
@@ -44,4 +47,3 @@ async def get_shipment_status(shipment_id: UUID):
         case _:
             pass
     return "Shipment status."
-

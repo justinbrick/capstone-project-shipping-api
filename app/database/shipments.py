@@ -1,7 +1,8 @@
 from uuid import UUID
 from ..database import connection
 from ..models.shipment import Shipment, ShipmentStatus
-from ..database import ColumnNotFoundException
+from ..database import ColumnNotFoundException, ColumnInsertionException
+from sqlite3 import OperationalError
 
 # Drop shipment table
 connection.execute("DROP TABLE IF EXISTS shipments")
@@ -27,11 +28,14 @@ CREATE TABLE IF NOT EXISTS shipment_status (
 """)
 
 
-def save_shipment(shipment: Shipment):
+def save_shipment(shipment: Shipment) -> None:
     """
     Save the shipment to the database.
     """
-    connection.execute("INSERT INTO shipments (shipment_id, order_id, shipping_address, provider, provider_shipment_id) VALUES (?, ?, ?, ?, ?)", (str(shipment.shipment_id), str(shipment.order_id), shipment.shipping_address, shipment.provider, shipment.provider_shipment_id))
+    try:
+        connection.execute("INSERT INTO shipments (shipment_id, order_id, shipping_address, provider, provider_shipment_id) VALUES (?, ?, ?, ?, ?)", (str(shipment.shipment_id), str(shipment.order_id), shipment.shipping_address, shipment.provider, shipment.provider_shipment_id))
+    except OperationalError:
+        raise ColumnInsertionException("Could not commit data to the database!")
 
 def get_shipment(shipment_id: UUID) -> Shipment:
     """
