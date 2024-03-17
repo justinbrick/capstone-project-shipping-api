@@ -1,6 +1,6 @@
 import os
 
-def pytest_configure(_):
+def pytest_configure(config):
     """
     Checks if test.db exists, and if it does, deletes it.
     """

@@ -9,7 +9,7 @@ from app.main import app
 client = TestClient(app=app)
 expected_shipment_id : Optional[str] = None
 
-@pytest.mark.dependency() 
+@pytest.mark.dependency()
 def test_create_shipment():
     """
     Test the creation of a shipment, given fake data.
@@ -17,7 +17,7 @@ def test_create_shipment():
     global expected_shipment_id
     order_id = str(uuid4())
     shipping_address = "Pilsbury Doughboy Lane"
-    provider = "UPS"
+    provider = "ups"
     response = client.post("/shipments/", json={"order_id": order_id, "shipping_address": shipping_address, "provider": provider})
     assert response.status_code == 200
     json = response.json()

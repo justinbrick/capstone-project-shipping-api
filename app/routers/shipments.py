@@ -1,3 +1,7 @@
+"""
+A router containing endpoints for getting shipment information & creating shipments.
+"""
+
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -9,7 +13,7 @@ from ..models.shipment import CreateShipmentRequest, Provider, Shipment
 
 router = APIRouter()
 
-@router.post("/", response_model=Shipment)
+@router.post("/")
 async def create_shipment(request: CreateShipmentRequest, db: Session = Depends(get_db)) -> Shipment:
     """
     Creates a shipment, given the request.
@@ -32,7 +36,7 @@ async def get_shipment_request(shipment_id: UUID, db: Session = Depends(get_db))
     return shipment
 
 @router.get("/{shipment_id}/status")
-async def get_shipment_status(shipment_id: UUID):
+async def get_shipment_status(shipment_id: UUID, db: Session = Depends(get_db)):
     """
     Get the shipment status for a specific shipment ID.
     Due to varying providers, this is a delegate request. 
@@ -49,5 +53,5 @@ async def get_shipment_status(shipment_id: UUID):
         case Provider.USPS:
             pass
         case _:
-            pass
-    return "Shipment status."
+            raise HTTPException(status_code=400, detail="Invalid provider.\nValid Providers: " + ", ".join([provider.value for provider in Provider]))
+    raise HTTPException(status_code=500, detail="Could not get shipment status. Has this provider been implemented?")

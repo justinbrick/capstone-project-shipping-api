@@ -1,5 +1,10 @@
+"""
+Models for anything regarding shipments.
+"""
+
 from enum import Enum
 from uuid import UUID
+from datetime import datetime
 
 from pydantic import BaseModel
 
@@ -23,6 +28,14 @@ class Status(Enum):
     DELIVERED = "delivered"
     EXCEPTION = "exception"
 
+class ShipmentItem(BaseModel):
+    """
+    A shipment item that is related to a given shipment.
+    There can be multiple items associated with one shipment.
+    """
+    upc: int
+    stock: int
+
 class Shipment(BaseModel):
     """
     The shipment model represents a shipment that has been created for a specific order.
@@ -33,6 +46,7 @@ class Shipment(BaseModel):
     shipping_address: str
     provider: Provider
     provider_shipment_id: str
+    created_at: datetime
 
     model_config = {
         # This is a flag to indicate that the model should be created from the attributes.
