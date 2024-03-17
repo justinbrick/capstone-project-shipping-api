@@ -6,3 +6,4 @@ def pytest_configure(config):
     """
     if os.path.exists("test.db"):
         os.remove("test.db")
+        
