@@ -1,3 +1,7 @@
+"""
+Integration tests for the shipments endpoint.
+"""
+
 from typing import Optional
 from uuid import uuid4
 
@@ -7,7 +11,8 @@ from fastapi.testclient import TestClient  # or starlette
 from app.main import app
 
 client = TestClient(app=app)
-expected_shipment_id : Optional[str] = None
+expected_shipment_id: Optional[str] = None
+
 
 @pytest.mark.dependency()
 def test_create_shipment():
@@ -26,6 +31,7 @@ def test_create_shipment():
     assert json["provider"] == provider
     assert json["shipment_id"] is not None
     expected_shipment_id = json["shipment_id"]
+
 
 @pytest.mark.dependency(depends=["test_create_shipment"])
 def test_get_shipment():

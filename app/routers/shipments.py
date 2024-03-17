@@ -13,6 +13,7 @@ from ..models.shipment import CreateShipmentRequest, Provider, Shipment
 
 router = APIRouter()
 
+
 @router.post("/")
 async def create_shipment(request: CreateShipmentRequest, db: Session = Depends(get_db)) -> Shipment:
     """
@@ -23,6 +24,7 @@ async def create_shipment(request: CreateShipmentRequest, db: Session = Depends(
         return shipment
     except Exception as exc:
         raise HTTPException(status_code=500, detail="Could not create shipment.") from exc
+
 
 @router.get("/{shipment_id}")
 async def get_shipment_request(shipment_id: UUID, db: Session = Depends(get_db)) -> Shipment:
@@ -35,11 +37,12 @@ async def get_shipment_request(shipment_id: UUID, db: Session = Depends(get_db))
         raise HTTPException(status_code=404, detail="Shipment not found.")
     return shipment
 
+
 @router.get("/{shipment_id}/status")
 async def get_shipment_status(shipment_id: UUID, db: Session = Depends(get_db)):
     """
     Get the shipment status for a specific shipment ID.
-    Due to varying providers, this is a delegate request. 
+    Due to varying providers, this is a delegate request.
     As a result, it is volatile depending on the provider.
     """
     shipment = await get_shipment_request(shipment_id)
