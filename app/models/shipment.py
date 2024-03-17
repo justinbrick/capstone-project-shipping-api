@@ -1,5 +1,27 @@
-from pydantic import BaseModel
+from enum import Enum
 from uuid import UUID
+
+from pydantic import BaseModel
+
+
+class Provider(Enum):
+    """
+    The shipment provider enum
+    Represents the different providers that can be used to ship a package.
+    """
+    UPS = "ups"
+    FEDEX = "fedex"
+    USPS = "usps"
+    INTERNAL = "internal"
+
+class Status(Enum):
+    """
+    The shipment status enum represents the different statuses that a shipment can be in.
+    """
+    SHIPPED = "shipped"
+    IN_TRANSIT = "in_transit"
+    DELIVERED = "delivered"
+    EXCEPTION = "exception"
 
 class Shipment(BaseModel):
     """
@@ -9,13 +31,15 @@ class Shipment(BaseModel):
     order_id: UUID
     shipment_id: UUID
     shipping_address: str
-    provider: str
+    provider: Provider
     provider_shipment_id: str
 
     model_config = {
-        "from_attributes": True
+        # This is a flag to indicate that the model should be created from the attributes.
+        # Used to work with ORM models.
+        "from_attributes": True  
     }
-        
+
 class CreateShipmentRequest(BaseModel):
     """
     The shipment request model represents a request to create a shipment regarding a specific order.
@@ -23,16 +47,14 @@ class CreateShipmentRequest(BaseModel):
     """
     order_id: UUID
     shipping_address: str
-    provider: str  # This might need to be an enum so the documentation generates the correct options.
+    provider: Provider
 
 class ShipmentStatus(BaseModel):
     """
-    The status of a shipment - due to varying sources of shipment delivery, this must be put into one 
+    The status of a shipment
+    ue to varying sources of shipment delivery, this must be put into one 
     unified response. 
     """
     order_id: UUID
-    status: str
-
-
-
+    status: Status
     

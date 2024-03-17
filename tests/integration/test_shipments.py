@@ -1,8 +1,10 @@
 from typing import Optional
-from fastapi.testclient import TestClient # or starlette
-from app.main import app
 from uuid import uuid4
+
 import pytest
+from fastapi.testclient import TestClient  # or starlette
+
+from app.main import app
 
 client = TestClient(app=app)
 expected_shipment_id : Optional[str] = None

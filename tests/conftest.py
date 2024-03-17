@@ -1,9 +1,8 @@
 import os
 
-def pytest_configure(config):
+def pytest_configure(_):
     """
     Checks if test.db exists, and if it does, deletes it.
     """
     if os.path.exists("test.db"):
         os.remove("test.db")
-        

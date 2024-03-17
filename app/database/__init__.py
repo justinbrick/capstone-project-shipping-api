@@ -7,4 +7,3 @@ DATABASE_URL = environ.get("DATABASE_URL", "sqlite:///shipping.db?check_same_thr
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(engine)
 session = Session()
-
