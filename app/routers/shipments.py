@@ -1,32 +1,32 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from uuid import UUID
+from sqlalchemy.orm import Session
 
-from ..models.shipment import ShipmentRequest, Shipment, create_shipment
-from ..database import shipments as shipment_db
-from ..database import ColumnNotFoundException, ColumnInsertionException
+from .. import get_db
+from ..models.shipment import CreateShipmentRequest, Shipment
+from ..database.shipments import create_shipment as db_create_shipment, get_shipment as db_get_shipment
 
 router = APIRouter()
 
-@router.post("/")
-async def create_shipment_request(request: ShipmentRequest) -> Shipment:
+@router.post("/", response_model=Shipment)
+async def create_shipment(request: CreateShipmentRequest, db: Session = Depends(get_db)) -> Shipment:
     try:
-        shipment = create_shipment(request)
-        shipment_db.save_shipment(shipment)
+        shipment = db_create_shipment(db, request)
+        
         return shipment
-    except ColumnInsertionException:
-        raise HTTPException(status_code=500, detail=f"There was an error creating your shipment.")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Could not create shipment.")
 
 @router.get("/{shipment_id}")
-async def get_shipment_request(shipment_id: UUID) -> Shipment:
+async def get_shipment_request(shipment_id: UUID, db: Session = Depends(get_db)) -> Shipment:
     """
     Get the shipment using a specific shipment ID.
     This is the internal shipment - not the status of the shipment.
     """
-    try:
-        shipment = shipment_db.get_shipment(shipment_id)
-        return shipment
-    except ColumnNotFoundException:
-        raise HTTPException(status_code=404, detail=f"Could not find a shipment @ \"{shipment_id}\"")
+    shipment = db_get_shipment(db, shipment_id)
+    if shipment is None:
+        raise HTTPException(status_code=404, detail="Shipment not found.")
+    return shipment
 
 @router.get("/{shipment_id}/status")
 async def get_shipment_status(shipment_id: UUID):
@@ -37,7 +37,7 @@ async def get_shipment_status(shipment_id: UUID):
     shipment = await get_shipment_request(shipment_id)
     match shipment.provider:
         case "internal":
-            status = shipment_db.get_shipment_status(shipment_id)
+            pass
         case "ups":
             pass
         case "fedex":

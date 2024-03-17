@@ -1,18 +1,22 @@
 from pydantic import BaseModel
-from uuid import UUID, uuid4
-from ..database import connection
+from uuid import UUID
 
 class Shipment(BaseModel):
     """
     The shipment model represents a shipment that has been created for a specific order.
+    Multiple shipments can be created for one order.
     """
     order_id: UUID
     shipment_id: UUID
     shipping_address: str
     provider: str
     provider_shipment_id: str
+
+    model_config = {
+        "from_attributes": True
+    }
         
-class ShipmentRequest(BaseModel):
+class CreateShipmentRequest(BaseModel):
     """
     The shipment request model represents a request to create a shipment regarding a specific order.
     This is not stored in any database and is rather just used so that we can create the shipment itself.
@@ -29,13 +33,6 @@ class ShipmentStatus(BaseModel):
     order_id: UUID
     status: str
 
-def create_shipment(request: ShipmentRequest):
-    """
-    From a shipment, create a request which we will use to correlate a shipment to an order.
-    """
-    shipment_id = uuid4()
-    shipment = Shipment(order_id=request.order_id, shipment_id=shipment_id, shipping_address=request.shipping_address, provider=request.provider, provider_shipment_id="1234")
-    return shipment
-    
+
 
     

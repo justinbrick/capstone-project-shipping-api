@@ -2,10 +2,12 @@ from typing import Optional
 from fastapi.testclient import TestClient # or starlette
 from app.main import app
 from uuid import uuid4
+import pytest
 
 client = TestClient(app=app)
 expected_shipment_id : Optional[str] = None
 
+@pytest.mark.dependency() 
 def test_create_shipment():
     global expected_shipment_id
     order_id = str(uuid4())
@@ -20,6 +22,7 @@ def test_create_shipment():
     assert json["shipment_id"] != None
     expected_shipment_id = json["shipment_id"]
 
+@pytest.mark.dependency(depends=["test_create_shipment"])
 def test_get_shipment():
     response = client.get(f"/shipments/{expected_shipment_id}")
     assert response.status_code == 200
