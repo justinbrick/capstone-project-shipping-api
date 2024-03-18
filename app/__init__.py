@@ -1,5 +1,6 @@
 from .database import Session
 
+
 def get_db():
     db = Session()
     try:

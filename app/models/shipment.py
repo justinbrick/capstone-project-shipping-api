@@ -19,6 +19,7 @@ class Provider(Enum):
     USPS = "usps"
     INTERNAL = "internal"
 
+
 class Status(Enum):
     """
     The shipment status enum represents the different statuses that a shipment can be in.
@@ -28,6 +29,7 @@ class Status(Enum):
     DELIVERED = "delivered"
     EXCEPTION = "exception"
 
+
 class ShipmentItem(BaseModel):
     """
     A shipment item that is related to a given shipment.
@@ -35,6 +37,7 @@ class ShipmentItem(BaseModel):
     """
     upc: int
     stock: int
+
 
 class Shipment(BaseModel):
     """
@@ -51,8 +54,9 @@ class Shipment(BaseModel):
     model_config = {
         # This is a flag to indicate that the model should be created from the attributes.
         # Used to work with ORM models.
-        "from_attributes": True  
+        "from_attributes": True
     }
+
 
 class CreateShipmentRequest(BaseModel):
     """
@@ -63,12 +67,12 @@ class CreateShipmentRequest(BaseModel):
     shipping_address: str
     provider: Provider
 
+
 class ShipmentStatus(BaseModel):
     """
     The status of a shipment
     ue to varying sources of shipment delivery, this must be put into one 
-    unified response. 
+    unified response.
     """
     order_id: UUID
     status: Status
-    

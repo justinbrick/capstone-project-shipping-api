@@ -12,10 +12,12 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from ..models.shipment import Provider, Status
 
+
 class Base(DeclarativeBase):
     """
     A base class used to create the tables and metadata for the database.
     """
+
 
 class Shipment(Base):
     """
@@ -31,6 +33,7 @@ class Shipment(Base):
     created_at: Mapped[datetime]
     items: Mapped[list["ShipmentItem"]] = relationship()
 
+
 class ShipmentItem(Base):
     """
     A shipment item that is related to a given shipment.
@@ -41,6 +44,7 @@ class ShipmentItem(Base):
     upc: Mapped[int] = mapped_column(primary_key=True)
     stock: Mapped[int]
 
+
 class ShipmentStatus(Base):
     """
     The status of any given shipment. 
@@ -49,4 +53,3 @@ class ShipmentStatus(Base):
     __tablename__ = "shipment_status"
     shipment_id: Mapped[UUID] = mapped_column(ForeignKey("shipments.shipment_id"), primary_key=True)
     status_message: Mapped[Status]
-    
