@@ -7,6 +7,8 @@ from random import choice, randint
 
 import pytest
 
+from app.database.schemas import Warehouse
+from app.database.warehouse import get_nearest_warehouse
 from app.models.shipment import CreateShipmentRequest, Provider
 from app.database.shipments import create_shipment, get_shipment
 from app import get_db
@@ -63,3 +65,23 @@ def test_get_shipment():
     assert retrieved_shipment.provider == shipment.provider
     assert retrieved_shipment.created_at == shipment.created_at
     assert retrieved_shipment.provider_shipment_id == shipment.provider_shipment_id
+
+
+test_warehouses = [
+    Warehouse(warehouse_id=uuid4(), address="East", latitude=35.705054, longitude=-79.809727),
+    Warehouse(warehouse_id=uuid4(), address="South", latitude=31.193425, longitude=-98.624873),
+    Warehouse(warehouse_id=uuid4(), address="West", latitude=41.130868, longitude=-115.962108),
+    Warehouse(warehouse_id=uuid4(), address="North", latitude=45.379562, longitude=-98.490035)
+]
+
+
+def test_get_nearest_warehouse():
+    """
+    Tests a known location to ensure the nearest warehouse is returned.
+    """
+    db = next(get_db())
+    db.add_all(test_warehouses)
+    db.commit()
+    test_address = "2683 NC-24, Warsaw, NC 28398"
+    nearest_warehouse = get_nearest_warehouse(db, test_address)
+    assert nearest_warehouse.address == "East"

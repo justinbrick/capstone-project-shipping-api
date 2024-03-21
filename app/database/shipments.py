@@ -18,29 +18,37 @@ def create_shipment(db: Session, shipment: CreateShipmentRequest) -> schemas.Shi
     new_shipment_id = uuid4()
     provider_shipment_id = "1234"
     created_at = datetime.now()
-    created_shipment = schemas.Shipment(**shipment.model_dump(), shipment_id=new_shipment_id, provider_shipment_id=provider_shipment_id, created_at=created_at)
+    created_shipment = schemas.Shipment(
+        **shipment.model_dump(),
+        shipment_id=new_shipment_id,
+        provider_shipment_id=provider_shipment_id,
+        created_at=created_at)
+
     db.add(created_shipment)
     db.commit()
     db.refresh(created_shipment)
     return created_shipment
 
+
 def get_shipment(db: Session, shipment_id: UUID) -> schemas.Shipment:
     """
     Get the shipment from the database, using the shipment ID.
 
-    :param shipment_id: the ID of the shipment to get 
+    :param shipment_id: the ID of the shipment to get
     :return: the shipment object
     """
     shipment = db.query(schemas.Shipment).filter(schemas.Shipment.shipment_id == shipment_id).first()
     return shipment
 
+
 def get_shipment_items(db: Session, shipment_id: UUID) -> list[tuple[int, int]]:
     """
     Given a shipment ID returns all of the shipment items that are registered under that specific shipment.
 
-    :param shipment_id: the ID of the shipment to get 
+    :param shipment_id: the ID of the shipment to get
     :return: A list of tuple[upc, stock], which represent the items & stock that the order contains.
     """
+
 
 def get_shipment_status(db: Session, shipment_id: UUID) -> ShipmentStatus:
     """

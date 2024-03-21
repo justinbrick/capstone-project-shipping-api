@@ -71,8 +71,7 @@ class CreateShipmentRequest(BaseModel):
 class ShipmentStatus(BaseModel):
     """
     The status of a shipment
-    ue to varying sources of shipment delivery, this must be put into one 
-    unified response.
+    Due to varying sources of shipment delivery, this must be put into one unified response.
     """
     order_id: UUID
     status: Status

@@ -34,6 +34,16 @@ class Shipment(Base):
     items: Mapped[list["ShipmentItem"]] = relationship()
 
 
+class WarehouseItem(Base):
+    """
+    An item that is stored in a warehouse.
+    """
+    __tablename__ = "warehouse_items"
+    warehouse_id: Mapped[UUID] = mapped_column(ForeignKey("warehouses.warehouse_id"), primary_key=True)
+    upc: Mapped[int] = mapped_column(primary_key=True)
+    stock: Mapped[int]
+
+
 class ShipmentItem(Base):
     """
     A shipment item that is related to a given shipment.
@@ -47,9 +57,21 @@ class ShipmentItem(Base):
 
 class ShipmentStatus(Base):
     """
-    The status of any given shipment. 
+    The status of any given shipment.
     For internal purposes only.
     """
     __tablename__ = "shipment_status"
     shipment_id: Mapped[UUID] = mapped_column(ForeignKey("shipments.shipment_id"), primary_key=True)
     status_message: Mapped[Status]
+
+
+class Warehouse(Base):
+    """
+    A warehouse that is used to store items and fulfill orders.
+    """
+    __tablename__ = "warehouses"
+    warehouse_id: Mapped[UUID] = mapped_column(primary_key=True)
+    address: Mapped[str]
+    latitude: Mapped[float]
+    longitude: Mapped[float]
+    items: Mapped[list["WarehouseItem"]] = relationship()

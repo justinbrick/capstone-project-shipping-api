@@ -4,6 +4,7 @@ File containing methods for tracking a shipment
 
 from ..models.shipment import ShipmentStatus
 
+
 async def get_shipment_status(shipment_id: str) -> ShipmentStatus:
     """
     STUB
@@ -11,4 +12,3 @@ async def get_shipment_status(shipment_id: str) -> ShipmentStatus:
     Due to varying providers, this is a delegate request.
     As a result, it is volatile depending on the provider.
     """
-    
