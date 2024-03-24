@@ -1,3 +1,0 @@
-"""
-Models for order information
-"""

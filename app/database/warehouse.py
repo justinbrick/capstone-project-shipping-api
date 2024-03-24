@@ -1,5 +1,6 @@
 """
 Database functions for warehouse
+This is volatile and will be removed in the future, once inventory team has implemented the warehouse API.
 """
 
 from ..shipping.location import get_address_coordinates

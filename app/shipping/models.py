@@ -1,33 +1,12 @@
 """
-Models for anything regarding shipments.
+Models for the shipping API.
 """
 
-from enum import Enum
+from .enums import Provider, Status
+
 from uuid import UUID
 from datetime import datetime
-
 from pydantic import BaseModel
-
-
-class Provider(Enum):
-    """
-    The shipment provider enum
-    Represents the different providers that can be used to ship a package.
-    """
-    UPS = "ups"
-    FEDEX = "fedex"
-    USPS = "usps"
-    INTERNAL = "internal"
-
-
-class Status(Enum):
-    """
-    The shipment status enum represents the different statuses that a shipment can be in.
-    """
-    SHIPPED = "shipped"
-    IN_TRANSIT = "in_transit"
-    DELIVERED = "delivered"
-    EXCEPTION = "exception"
 
 
 class ShipmentItem(BaseModel):

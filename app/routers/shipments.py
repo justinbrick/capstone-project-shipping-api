@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from .. import get_db
 from ..database import shipments as db_shipments
-from ..models.shipment import CreateShipmentRequest, Provider, Shipment
+from ..shipping.models import CreateShipmentRequest, Provider, Shipment
 
 router = APIRouter()
 

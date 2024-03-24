@@ -10,7 +10,7 @@ from datetime import datetime
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from ..models.shipment import Provider, Status
+from ..shipping.models import Provider, Status
 
 
 class Base(DeclarativeBase):

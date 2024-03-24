@@ -7,7 +7,7 @@ from uuid import UUID, uuid4
 
 from sqlalchemy.orm import Session
 
-from ..models.shipment import CreateShipmentRequest, ShipmentStatus
+from ..shipping.models import CreateShipmentRequest, ShipmentStatus
 from . import schemas
 
 
