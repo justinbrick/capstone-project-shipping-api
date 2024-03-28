@@ -78,3 +78,14 @@ class Warehouse(Base):
     latitude: Mapped[float]
     longitude: Mapped[float]
     items: Mapped[list["WarehouseItem"]] = relationship()
+
+
+class MockShipmentIDs(Base):
+    """
+    Database to hold mock tracking numbers and hard coded statuses
+    """
+
+    __tablename__ = "mock_shipment_ids"
+    shipment_id: Mapped[UUID] = mapped_column(primary_key=True)
+    tracking_number: Mapped[int]
+    status: Mapped[str]
