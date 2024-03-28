@@ -39,7 +39,8 @@ class WarehouseItem(Base):
     An item that is stored in a warehouse.
     """
     __tablename__ = "warehouse_items"
-    warehouse_id: Mapped[UUID] = mapped_column(ForeignKey("warehouses.warehouse_id"), primary_key=True)
+    warehouse_id: Mapped[UUID] = mapped_column(
+        ForeignKey("warehouses.warehouse_id"), primary_key=True)
     upc: Mapped[int] = mapped_column(primary_key=True)
     stock: Mapped[int]
 
@@ -50,7 +51,8 @@ class ShipmentItem(Base):
     There can be multiple items associated with one shipment.
     """
     __tablename__ = "shipment_items"
-    shipment_id: Mapped[UUID] = mapped_column(ForeignKey("shipments.shipment_id"), primary_key=True)
+    shipment_id: Mapped[UUID] = mapped_column(
+        ForeignKey("shipments.shipment_id"), primary_key=True)
     upc: Mapped[int] = mapped_column(primary_key=True)
     stock: Mapped[int]
 
@@ -61,7 +63,8 @@ class ShipmentStatus(Base):
     For internal purposes only.
     """
     __tablename__ = "shipment_status"
-    shipment_id: Mapped[UUID] = mapped_column(ForeignKey("shipments.shipment_id"), primary_key=True)
+    shipment_id: Mapped[UUID] = mapped_column(
+        ForeignKey("shipments.shipment_id"), primary_key=True)
     status_message: Mapped[Status]
 
 
