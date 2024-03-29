@@ -9,7 +9,7 @@ import pytest
 
 from app.database.schemas import Warehouse
 from app.database.warehouse import get_nearest_warehouse
-from app.models.shipment import CreateShipmentRequest, Provider
+from app.shipping.models import CreateShipmentRequest, Provider
 from app.database.shipments import create_shipment, get_shipment
 from app import get_db
 
