@@ -27,7 +27,7 @@ async def create_shipment(request: CreateShipmentRequest, db: Session = Depends(
 
 
 @router.get("/{shipment_id}")
-async def get_shipment_request(shipment_id: UUID, db: Session = Depends(get_db)) -> Shipment:
+async def get_shipment(shipment_id: UUID, db: Session = Depends(get_db)) -> Shipment:
     """
     Get the shipment using a specific shipment ID.
     This is the internal shipment - not the status of the shipment.
@@ -45,7 +45,7 @@ async def get_shipment_status(shipment_id: UUID, db: Session = Depends(get_db)):
     Due to varying providers, this is a delegate request.
     As a result, it is volatile depending on the provider.
     """
-    shipment = await get_shipment_request(shipment_id)
+    shipment = await get_shipment(shipment_id, db)
     match shipment.provider:
         case Provider.INTERNAL:
             pass

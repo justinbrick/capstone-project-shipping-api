@@ -2,7 +2,7 @@
 File containing methods for tracking a shipment
 """
 
-from ..models.shipment import ShipmentStatus
+from ..shipping.models import ShipmentStatus
 
 
 async def get_shipment_status(shipment_id: str) -> ShipmentStatus:
