@@ -25,7 +25,8 @@ async def create_shipment(request: CreateShipmentRequest, db: Session = Depends(
         shipment = db_shipments.create_shipment(db, request)
         return shipment
     except Exception as exc:
-        raise HTTPException(status_code=500, detail="Could not create shipment.") from exc
+        raise HTTPException(
+            status_code=500, detail="Could not create shipment.") from exc
 
 
 @router.get("/{shipment_id}")
@@ -58,5 +59,10 @@ async def get_shipment_status(shipment_id: UUID, db: Session = Depends(get_db)):
         case Provider.USPS:
             pass
         case _:
-            raise HTTPException(status_code=400, detail="Invalid provider.\nValid Providers: " + ", ".join([provider.value for provider in Provider]))
-    raise HTTPException(status_code=500, detail="Could not get shipment status. Has this provider been implemented?")
+            raise HTTPException(status_code=400, detail="Invalid provider.\nValid Providers: " +
+                                ", ".join([provider.value for provider in Provider]))
+    raise HTTPException(
+        status_code=500, detail="Could not get shipment status. Has this provider been implemented?")
+
+
+"Could the about function get rid of the match statement and just call the get_shipment_request function?"

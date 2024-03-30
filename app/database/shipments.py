@@ -37,7 +37,8 @@ def get_shipment(db: Session, shipment_id: UUID) -> schemas.Shipment:
     :param shipment_id: the ID of the shipment to get
     :return: the shipment object
     """
-    shipment = db.query(schemas.Shipment).filter(schemas.Shipment.shipment_id == shipment_id).first()
+    shipment = db.query(schemas.Shipment).filter(
+        schemas.Shipment.shipment_id == shipment_id).first()
     return shipment
 
 
@@ -59,5 +60,18 @@ def get_shipment_status(db: Session, shipment_id: UUID) -> ShipmentStatus:
     :param shipment_id: the ID of the shipment to get
     :return: the shipment status
     """
-    shipment_status = db.query(schemas.ShipmentStatus).filter(schemas.ShipmentStatus.shipment_id == shipment_id).first()
+    shipment_status = db.query(schemas.ShipmentStatus).filter(
+        schemas.ShipmentStatus.shipment_id == shipment_id).first()
+    return shipment_status
+
+
+def get_mock_shipping_status(db: Session, tracking_number: int) -> str:
+    """
+    Get the status of a package with a given tracking number.
+
+    :param tracking_number: the tracking number to get the status for
+    :return: the status of the package
+    """
+    shipment_status = db.query(schemas.ShipmentStatus).filter(
+        schemas.ShipmentStatus.tracking_number == tracking_number).first()
     return shipment_status
