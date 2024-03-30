@@ -1,5 +1,5 @@
 """
-A router to get user related shipping information.
+A router to create/return a shipment.
 """
 
 from uuid import UUID
