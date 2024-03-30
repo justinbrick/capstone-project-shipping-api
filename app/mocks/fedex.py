@@ -4,7 +4,7 @@ Mock FedEx tracking API
 from .. import get_db
 from ..database import shipments as db_shipments
 from ..shipping.models import CreateShipmentRequest, Provider, Shipment
-from uuid import UUID
+from uuid import UUID, uuid4
 """
 TODO: Implement the following functions to complete the FedEx mock API.
 
