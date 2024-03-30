@@ -26,10 +26,8 @@ app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(returns.router, prefix="/returns", tags=["returns"])
 
 if __name__ == "__main__":
-    import asyncio
-    from .inventory.warehouse import get_warehouses
-
-    async def main():
-        warehouses = await get_warehouses()
-
-    asyncio.run(main())
+    import uvicorn
+    from os import environ
+    host_name = environ.get("HOST_NAME", "127.0.0.1")
+    host_port = int(environ.get("HOST_PORT", "8000"))
+    uvicorn.run(app, host=host_name, port=host_port)

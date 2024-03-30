@@ -13,7 +13,7 @@ from jwt.algorithms import RSAAlgorithm
 # import JWT encoding enums
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
-from app.auth.microsoft import get_json_keys, get_user_json_keys
+from app.auth.microsoft import get_json_keys
 
 
 def __copy_func_meta(to_func, from_func):
@@ -28,9 +28,11 @@ def __copy_func_meta(to_func, from_func):
     to_func.__doc__ = from_func.__doc__
 
 
-def __get_jwt(request: Request):
+def get_jwt(request: Request):
     """
-    Gets the JWT of the access token from the request.
+    A dependency request, which gets the JWT from the current request scope.
+    This takes advantage of FastAPI dependency injection.
+    If you are not using FastAPI, then you must get the JWT from the ASGI request scope manually.
     """
     jwt = request.scope["jwt"]
     if jwt is None:
@@ -51,10 +53,10 @@ def require_scopes(scope: str):
         func_signature = inspect.signature(func)
         replaced_parameters = [
             *func_signature.parameters.values(),
-            inspect.Parameter("jwt", inspect.Parameter.POSITIONAL_OR_KEYWORD, default=Depends(__get_jwt)),
+            inspect.Parameter("jwt", inspect.Parameter.POSITIONAL_OR_KEYWORD, default=Depends(get_jwt)),
         ]
 
-        async def wrapper(*args, jwt: any = Depends(__get_jwt), **kwargs):
+        async def wrapper(*args, jwt: any = Depends(get_jwt), **kwargs):
             scope_string = jwt["scp"]
 
             # Check scopes
@@ -95,7 +97,7 @@ class EntraOAuth2Middleware:
         if url.path in self.anonymous_endpoints:
             await self.app(scope, receive, send)
             return
-        
+
         headers = Headers(scope=scope)
         # Get the authorization as a bearer token, throw authorization error if it doesn't.
         authorization = headers.get("authorization")
@@ -103,19 +105,19 @@ class EntraOAuth2Middleware:
             response = PlainTextResponse("Authorization header is required.", status_code=401)
             await response(scope, receive, send)
             return
-    
+
         # Get the token from the authorization header, verify it is bearer token.
         parts = authorization.split()
         if len(parts) != 2 or parts[0].lower() != "bearer":
             response = PlainTextResponse("Invalid authorization header.", status_code=401)
             await response(scope, receive, send)
             return
-        
+
         # Get the bearer token, verify it is valid.
         token = parts[1]
         try:
             # Gets the first part of the JWT, so we can verify against the key ID (kid)
-            jwt_keys = await get_user_json_keys()
+            jwt_keys = await get_json_keys()
             unverified_header = jwt.get_unverified_header(token)
 
             accepted_keys = [key for key in jwt_keys if key["kid"] == unverified_header["kid"]]
@@ -128,9 +130,7 @@ class EntraOAuth2Middleware:
             # Convert accepted_key to PEM format
             reformed_key = RSAAlgorithm.from_jwk(accepted_key).public_bytes(encoding=Encoding.PEM, format=PublicFormat.PKCS1)
 
-            # You can optionally choose to verify the issuer to be the B2C issuer, or classic sts issuer.
-            # TODO: Implement this logic. Low priority. I think? Needs research. Already seems overkill anyway.
-            payload = jwt.decode(token, reformed_key, algorithms=["RS256"], audience=self.client_id, verify=True)
+            payload = jwt.decode(token, reformed_key, algorithms=["RS256"], audience=self.client_id, issuer="", verify=True)
             # Hooray, they've passed verification!
             scope["jwt"] = payload
             await self.app(scope, receive, send)
@@ -147,6 +147,9 @@ class EntraOAuth2Middleware:
             await response(scope, receive, send)
             return
         except Exception as exc:
+            if __debug__:
+                print("An error occurred while verifying the token: ", exc)
+
             response = PlainTextResponse("Invalid token.", status_code=401)
             await response(scope, receive, send)
             return
