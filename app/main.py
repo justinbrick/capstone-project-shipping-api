@@ -1,8 +1,4 @@
 from fastapi import FastAPI
-import dotenv
-
-dotenv.load_dotenv()
-
 
 from .auth import CLIENT_ID, TENANT_ID
 from .routers import shipments, users, returns

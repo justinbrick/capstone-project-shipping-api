@@ -29,9 +29,9 @@ def gen_random_address() -> str:
 
 def gen_fake_shipment_request() -> CreateShipmentRequest:
     return CreateShipmentRequest(
-        order_id=uuid4(),
         shipping_address=gen_random_address(),
-        provider=choice(list(Provider))
+        provider=choice(list(Provider)),
+        items=[]
     )
 
 
@@ -43,7 +43,6 @@ def test_create_shipment():
     db = next(get_db())
     request = gen_fake_shipment_request()
     shipment = create_shipment(db, request)
-    assert shipment.order_id == request.order_id
     assert shipment.shipping_address == request.shipping_address
     assert shipment.provider == request.provider
     assert shipment.shipment_id is not None
@@ -60,7 +59,6 @@ def test_get_shipment():
     retrieved_shipment = get_shipment(db, shipment.shipment_id)
     assert retrieved_shipment == shipment
     assert retrieved_shipment.shipment_id == shipment.shipment_id
-    assert retrieved_shipment.order_id == shipment.order_id
     assert retrieved_shipment.shipping_address == shipment.shipping_address
     assert retrieved_shipment.provider == shipment.provider
     assert retrieved_shipment.created_at == shipment.created_at

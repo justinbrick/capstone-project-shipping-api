@@ -26,7 +26,6 @@ class Shipment(Base):
     """
     __tablename__ = "shipments"
     shipment_id: Mapped[UUID] = mapped_column(primary_key=True)
-    order_id: Mapped[UUID]
     shipping_address: Mapped[str]
     provider: Mapped[Provider]
     provider_shipment_id: Mapped[str]
@@ -34,13 +33,34 @@ class Shipment(Base):
     items: Mapped[list["ShipmentItem"]] = relationship()
 
 
+class ShipmentDeliveryInfo(Base):
+    """
+    A table to store the delivery information for a shipment.
+    """
+    __tablename__ = "shipment_delivery_info"
+    shipment_id: Mapped[UUID] = mapped_column(ForeignKey("shipments.shipment_id"), primary_key=True)
+    delivery_id: Mapped[UUID] = mapped_column(ForeignKey("deliveries.delivery_id"), primary_key=True)
+
+
+class Delivery(Base):
+    """
+    Represents a full delivery, composed of the individual orders.
+    """
+    __tablename__ = "deliveries"
+    delivery_id: Mapped[UUID] = mapped_column(primary_key=True)
+    order_id: Mapped[UUID]
+    created_at: Mapped[datetime]
+    fulfilled_at: Mapped[datetime] = mapped_column(nullable=True)
+    delivery_sla: Mapped[str]
+    delivery_shipments: Mapped[list["ShipmentDeliveryInfo"]] = relationship()
+
+
 class WarehouseItem(Base):
     """
     An item that is stored in a warehouse.
     """
     __tablename__ = "warehouse_items"
-    warehouse_id: Mapped[UUID] = mapped_column(
-        ForeignKey("warehouses.warehouse_id"), primary_key=True)
+    warehouse_id: Mapped[UUID] = mapped_column(ForeignKey("warehouses.warehouse_id"), primary_key=True)
     upc: Mapped[int] = mapped_column(primary_key=True)
     stock: Mapped[int]
 

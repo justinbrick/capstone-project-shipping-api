@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 @router.post("/")
-@require_scopes("Shipment.Create")
+@require_scopes(["Shipment.Create"])
 async def create_shipment(request: CreateShipmentRequest, db: Session = Depends(get_db)) -> Shipment:
     """
     Creates a shipment, given the request.
@@ -30,6 +30,7 @@ async def create_shipment(request: CreateShipmentRequest, db: Session = Depends(
 
 
 @router.get("/{shipment_id}")
+@require_scopes(["Shipment.Read"])
 async def get_shipment(shipment_id: UUID, db: Session = Depends(get_db)) -> Shipment:
     """
     Get the shipment using a specific shipment ID.
@@ -42,6 +43,7 @@ async def get_shipment(shipment_id: UUID, db: Session = Depends(get_db)) -> Ship
 
 
 @router.get("/{shipment_id}/status")
+@require_scopes(["Shipment.Read"])
 async def get_shipment_status(shipment_id: UUID, db: Session = Depends(get_db)):
     """
     Get the shipment status for a specific shipment ID.

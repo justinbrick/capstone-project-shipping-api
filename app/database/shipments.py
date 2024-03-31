@@ -8,6 +8,7 @@ from uuid import UUID, uuid4
 from sqlalchemy.orm import Session
 
 from ..shipping.models import CreateShipmentRequest, ShipmentStatus
+from ..shipping.enums import Provider
 from . import schemas
 
 

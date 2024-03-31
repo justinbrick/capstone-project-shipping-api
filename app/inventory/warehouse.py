@@ -31,4 +31,3 @@ async def get_warehouse_stock(warehouse_id: UUID, upcs: list[int]):
     response = await client.post(f"/warehouses/{warehouse_id}/stock", json={"items": upcs})
     response.raise_for_status()
     return response.json()
-

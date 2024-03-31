@@ -12,6 +12,8 @@
             "args": [
                 "app.main:app",
                 "--reload",
+                "--env-file",
+                ".env"
             ],
             "jinja": true
         }

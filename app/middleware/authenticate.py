@@ -14,6 +14,17 @@ from jwt.algorithms import RSAAlgorithm
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 from app.auth.microsoft import get_json_keys
+from app.auth import TENANT_SHORT_NAME
+
+ISSUER_URL = f"https://{TENANT_SHORT_NAME}.b2clogin.com/{TENANT_SHORT_NAME}.onmicrosoft.com/v2.0"
+
+# Some warnings for debug mode, as we are not verifying the token.
+if __debug__:
+    import warnings
+    warnings.warn("Debug mode is enabled. Tokens are not being verified.", RuntimeWarning)
+    print("WARNING: Debug mode is enabled. Tokens are not being verified.")
+    print("WARNING: This is a security risk and should not be used in production.")
+    print("WARNING: To disable debug mode, run the application with the -O flag.")
 
 
 def __copy_func_meta(to_func, from_func):
@@ -36,17 +47,17 @@ def get_jwt(request: Request):
     """
     jwt = request.scope["jwt"]
     if jwt is None:
-        raise ValueError("JWT is required for this request.")
+        raise HTTPException(status_code=401, detail="Invalid token.")
     yield jwt
 
 
-def require_scopes(scope: str):
+def require_scopes(scopes: list[str]):
     """
     A decorator that requires a specific scope to be present in the JWT.
 
     """
 
-    if scope is None or len(scope) == 0:
+    if scopes is None or len(scopes) == 0:
         raise ValueError("Scopes are required for this decorator.")
 
     def decorator(func):
@@ -61,14 +72,16 @@ def require_scopes(scope: str):
 
             # Check scopes
             if scope_string is None:
-                raise HTTPException(status_code=401, detail="Invalid scope.")
-            if scope not in scope_string:
-                raise HTTPException(status_code=401, detail="Invalid scope.")
+                raise HTTPException(status_code=403, detail="Invalid scope.")
+            if not all(scope in scope_string for scope in scopes):
+                raise HTTPException(status_code=403, detail="Invalid scope.")
 
             return await func(*args, **kwargs)
 
         wrapper.__signature__ = func_signature.replace(parameters=replaced_parameters)
         __copy_func_meta(wrapper, func)
+        # Add the scopes to the docstring.
+        wrapper.__doc__ = f"{func.__doc__}\n\nRequires scopes: {str.join(', ', scopes)}"
         return wrapper
     return decorator
 
@@ -116,6 +129,22 @@ class EntraOAuth2Middleware:
         # Get the bearer token, verify it is valid.
         token = parts[1]
         try:
+            if __debug__:
+                # If we are in debug mode, we can skip the verification of the token.
+                options = {
+                    "verify_signature": False,
+                    "verify_exp": False,
+                    "verify_iat": False,
+                    "verify_aud": False,
+                    "verify_iss": False,
+                    "verify_sub": False,
+                    "verify_jti": False
+                }
+                debug_jwt = jwt.decode(token, options=options)
+                scope["jwt"] = debug_jwt
+                await self.app(scope, receive, send)
+                return
+
             # Gets the first part of the JWT, so we can verify against the key ID (kid)
             jwt_keys = await get_json_keys()
             unverified_header = jwt.get_unverified_header(token)
@@ -129,8 +158,8 @@ class EntraOAuth2Middleware:
 
             # Convert accepted_key to PEM format
             reformed_key = RSAAlgorithm.from_jwk(accepted_key).public_bytes(encoding=Encoding.PEM, format=PublicFormat.PKCS1)
-
-            payload = jwt.decode(token, reformed_key, algorithms=["RS256"], audience=self.client_id, issuer="", verify=True)
+            options = {"verify_exp": True, "verify_signature": True}
+            payload = jwt.decode(token, reformed_key, algorithms=["RS256"], audience=self.client_id, issuer=ISSUER_URL, options=options)
             # Hooray, they've passed verification!
             scope["jwt"] = payload
             await self.app(scope, receive, send)
@@ -146,7 +175,7 @@ class EntraOAuth2Middleware:
             response = PlainTextResponse("Invalid token.", status_code=401)
             await response(scope, receive, send)
             return
-        except Exception as exc:
+        except jwt.PyJWTError as exc:
             if __debug__:
                 print("An error occurred while verifying the token: ", exc)
 
