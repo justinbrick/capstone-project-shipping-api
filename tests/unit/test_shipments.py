@@ -8,7 +8,7 @@ from random import choice, randint
 import pytest
 
 from app.database.schemas import Warehouse
-from app.database.warehouse import get_nearest_warehouse
+from app.inventory.warehouse import get_nearest_warehouses
 from app.shipping.models import CreateShipmentRequest, Provider
 from app.database.shipments import create_shipment, get_shipment
 from app import get_db
@@ -72,14 +72,18 @@ test_warehouses = [
     Warehouse(warehouse_id=uuid4(), address="North", latitude=45.379562, longitude=-98.490035)
 ]
 
-
-def test_get_nearest_warehouse():
+@pytest.mark.asyncio
+async def test_get_nearest_warehouses():
     """
-    Tests a known location to ensure the nearest warehouse is returned.
+    Tests a known location to ensure the nearest warehouses are returned.
     """
     db = next(get_db())
     db.add_all(test_warehouses)
     db.commit()
     test_address = "2683 NC-24, Warsaw, NC 28398"
-    nearest_warehouse = get_nearest_warehouse(db, test_address)
-    assert nearest_warehouse.address == "East"
+    nearest_warehouses = await get_nearest_warehouses(test_address)
+    assert len(nearest_warehouses) == 4
+    assert nearest_warehouses[0].address == "East"
+    assert nearest_warehouses[1].address == "South"
+    assert nearest_warehouses[2].address == "North"
+    assert nearest_warehouses[3].address == "West"

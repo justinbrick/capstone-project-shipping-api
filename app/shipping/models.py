@@ -16,7 +16,9 @@ class ShipmentItem(BaseModel):
     There can be multiple items associated with one shipment.
     """
     upc: int
+    """The UPC of the item."""
     stock: int
+    """The amount requested for this item."""
 
 
 class Shipment(BaseModel):
@@ -25,11 +27,17 @@ class Shipment(BaseModel):
     Multiple shipments can be created for one order.
     """
     shipment_id: UUID
+    """A unique identifier for the shipment."""
     shipping_address: str
+    """The address that the shipment is going to."""
     provider: Provider
+    """The provider that is going to be used for this shipment."""
     provider_shipment_id: str
+    """The ID that the provider has assigned to this shipment, for external references."""
     created_at: datetime
+    """The time that this shipment was created."""
     delivered_at: Optional[datetime] = None
+    """The time that this shipment was delivered."""
 
     model_config = {
         # This is a flag to indicate that the model should be created from the attributes.
@@ -43,6 +51,7 @@ class DeliveryShipment(Shipment):
     A shipment that is created for a delivery.
     """
     delivery_id: UUID
+    """The ID of the delivery that this shipment is associated with."""
 
 
 class Delivery(BaseModel):
@@ -51,10 +60,13 @@ class Delivery(BaseModel):
     This is a simple composite model to represent all the orders that this is made of.
     """
     order_id: UUID
+    """The ID of the order that this delivery is associated with."""
     created_at: datetime
+    """The time that this delivery was created."""
     fulfilled_at: Optional[datetime] = None
+    """The time that this delivery was fulfilled."""
     delivery_sla: SLA
-    shipments: list[DeliveryShipment]
+    """The SLA that this delivery must adhere to."""
 
 
 class DeliveryTimeResponse(BaseModel):
@@ -62,8 +74,11 @@ class DeliveryTimeResponse(BaseModel):
     Represents the response with delivery time, items, stock, and the provider.
     """
     delivery_time: datetime
+    """The time that the delivery is expected to be delivered."""
     items: list[ShipmentItem]
+    """The items that are going to be delivered."""
     provider: Provider
+    """The provider that is going to deliver the items."""
 
 
 class ShipmentDeliveryBreakdown(BaseModel):
@@ -71,25 +86,38 @@ class ShipmentDeliveryBreakdown(BaseModel):
     Provides a breakdown of the delivery times and shipping providers, given a specific order.
     """
     order_id: UUID
+    """The ID of the order that this delivery breakdown is associated with."""
     recipient_address: str
+    """The address that the delivery is going to."""
+    expected_at: datetime
+    """The time that the delivery is expected to be delivered."""
+    can_meet_sla: bool
+    """Whether or not the delivery can meet the SLA."""
     delivery_times: list[DeliveryTimeResponse]
+    """A list of delivery providers and their respective delivery times, given a set of items."""
 
 
 class CreateDeliveryRequest(BaseModel):
     """
-    A request to create a delivery.
+    A request to create a delivery. A delivery is based under an order, and can have multiple shipments.
     """
     delivery_sla: SLA
+    """The SLA that this delivery request must adhere to."""
+    items: list[ShipmentItem]
+    """A list of items that are going to be delivered."""
 
 
 class CreateShipmentRequest(BaseModel):
     """
     The shipment request model represents a request to create a shipment regarding a specific order.
-    This is not stored in any database and is rather just used so that we can create the shipment itself.
+    Usually used for returns & internal shipments.
     """
     shipping_address: str
+    """The address that the shipment is going to."""
     items: list[ShipmentItem]
+    """The items that are going to be shipped."""
     provider: Provider
+    """The provider that is going to be used for this shipment."""
 
 
 class CreateReturnRequest(BaseModel):
@@ -97,7 +125,9 @@ class CreateReturnRequest(BaseModel):
     A request which represents a return for a specific order.
     """
     order_id: UUID
+    """The ID of the order that this return request is associated with."""
     items: list[ShipmentItem]
+    """The items in the order that are being returned."""
 
 
 class ShipmentStatus(BaseModel):
@@ -106,4 +136,6 @@ class ShipmentStatus(BaseModel):
     Due to varying sources of shipment delivery, this must be put into one unified response.
     """
     order_id: UUID
+    """The ID of the order that this shipment status is associated with."""
     status: Status
+    """The status of the shipment."""

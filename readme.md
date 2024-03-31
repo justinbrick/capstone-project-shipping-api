@@ -17,6 +17,8 @@ This should help with reverse proxies and port collisions.
 These are optional and by default they are set to `127.0.0.1` and `8000`, respectively.
 ### Geocoding
 Geocoding uses Google Maps API. You can specify the API key using `MAPS_API_KEY`.
+If you do not specify a key, `Photon` will be used, and will likely be throttled. 
+If you get geocoding errors, please make sure that you have specified a Google Maps API key.
 ### Auth
 There are some fields that are required for authentication and authorization.
 - CLIENT_ID: The Client ID of the __API__ application.

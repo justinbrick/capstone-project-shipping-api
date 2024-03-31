@@ -1,27 +1,40 @@
 """
 Locational functions and services for shipping.
 """
+from functools import lru_cache
 import warnings
-from geopy.geocoders import GoogleV3
+from geopy.adapters import AioHTTPAdapter
+from geopy.geocoders import GoogleV3, Photon
 import sys
 from os import environ
 
+"""
+Caching for address coordinates is a relatively small number.
+This is because the coordinates will be queried in a quick burst.
+For debug purposes, the cache size is unlimited, as it will return random values.
+"""
 warehouse_api_key = environ.get("MAPS_API_KEY")
-if (warehouse_api_key is None and "pytest" not in sys.modules):
-    warnings.warn("No API key provided for the warehouse API. Some functionality may be limited.")
+cache_size = 128
+if __debug__:
+    cache_size = None
+    warnings.warn("Could not find Google Maps API key. Geocoding will be done through Photon.")
+    print("WARNING: Photon geocoding is prone to errors & rate limiting.")
+    print("WARNING: To disable debug mode, run the application with the -O flag.")
 
-geolocator: GoogleV3 | None = GoogleV3(api_key=warehouse_api_key) if warehouse_api_key is not None else None
 
-
-def get_address_coordinates(address: str) -> tuple[float, float]:
+@lru_cache(maxsize=cache_size)
+async def get_address_coordinates(address: str) -> tuple[float, float]:
     """
     Get the coordinates for a given address.
-
+    
     :param address: the address to get the coordinates for
     :return: the coordinates for the address
     """
-    if geolocator is None:
-        return (34.992180, -78.137839)
+    if warehouse_api_key is None:
+        async with Photon(adapter_factory=AioHTTPAdapter) as photon:
+            location = await photon.geocode(address)
+            return (location.latitude, location.longitude)
     else:
-        location = geolocator.geocode(components={"country": "US", "address": address})
-        return (location.latitude, location.longitude)
+        async with GoogleV3(api_key=warehouse_api_key, adapter_factory=AioHTTPAdapter) as google:
+            location = await google.geocode(address)
+            return (location.latitude, location.longitude)

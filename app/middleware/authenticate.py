@@ -21,7 +21,7 @@ ISSUER_URL = f"https://{TENANT_SHORT_NAME}.b2clogin.com/{TENANT_SHORT_NAME}.onmi
 # Some warnings for debug mode, as we are not verifying the token.
 if __debug__:
     import warnings
-    warnings.warn("Debug mode is enabled. Tokens are not being verified.", RuntimeWarning)
+    warnings.warn("Debug mode is enabled. Tokens are not being verified.")
     print("WARNING: Debug mode is enabled. Tokens are not being verified.")
     print("WARNING: This is a security risk and should not be used in production.")
     print("WARNING: To disable debug mode, run the application with the -O flag.")
