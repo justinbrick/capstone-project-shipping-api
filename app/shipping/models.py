@@ -52,7 +52,7 @@ class Delivery(BaseModel):
     """
     order_id: UUID
     created_at: datetime
-    fulfilled_at: Optional[datetime]
+    fulfilled_at: Optional[datetime] = None
     delivery_sla: SLA
     shipments: list[DeliveryShipment]
 

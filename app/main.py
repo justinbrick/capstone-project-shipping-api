@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from .auth import CLIENT_ID, TENANT_ID
-from .routers import shipments, users, returns
+from .routers import shipments, users, returns, orders
 from .middleware.authenticate import EntraOAuth2Middleware
 from .database import engine
 from .database.schemas import Base
@@ -20,6 +20,7 @@ app.add_middleware(EntraOAuth2Middleware, client_id=CLIENT_ID, tenant_id=TENANT_
 app.include_router(shipments.router, prefix="/shipments", tags=["shipments"])
 app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(returns.router, prefix="/returns", tags=["returns"])
+app.include_router(orders.router, prefix="/orders", tags=["orders"])
 
 if __name__ == "__main__":
     import uvicorn
