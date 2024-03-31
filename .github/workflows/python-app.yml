@@ -14,11 +14,7 @@ permissions:
 
 jobs:
   build:
-    env:
-      USER_FLOW: ${{ vars.USER_FLOW }}
-      CLIENT_ID: ${{ vars.CLIENT_ID }}
-      TENANT_ID: ${{ vars.TENANT_ID }}
-      TENANT_SHORT_NAME: ${{ vars.TENANT_SHORT_NAME }}
+    environment: Debug
     runs-on: ubuntu-latest
 
     steps:
