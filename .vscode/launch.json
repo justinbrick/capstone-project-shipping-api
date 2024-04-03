@@ -16,6 +16,16 @@
                 ".env"
             ],
             "jinja": true
+        },
+        {
+            "name": "Python: Run Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "tests"
+            ],
+            "jinja": true
         }
     ]
 }

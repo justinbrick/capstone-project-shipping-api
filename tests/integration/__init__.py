@@ -14,6 +14,7 @@ jwt_content = {
     "name": "John Doe",
     "iat": int(datetime.now().timestamp()),
     "scp": "Shipment.Write Shipment.Read Shipment.Create",
+    "extension_roles": "Admin Test"
 }
 test_jwt = jwt.encode(jwt_content, "test")
 

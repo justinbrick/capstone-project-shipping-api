@@ -7,7 +7,6 @@ from enum import Enum
 
 class Provider(Enum):
     """
-    The shipment provider enum
     Represents the different providers that can be used to ship a package.
     """
     UPS = "ups"

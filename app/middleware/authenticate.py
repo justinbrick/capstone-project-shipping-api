@@ -3,6 +3,7 @@
 Authentication & Authorization Middleware
 """
 
+from typing import Optional
 from fastapi import Depends, Request, HTTPException
 from starlette.types import ASGIApp, Scope, Receive, Send
 from starlette.datastructures import Headers, URL
@@ -27,6 +28,10 @@ if __debug__:
     print("WARNING: To disable debug mode, run the application with the -O flag.")
 
 
+class __INJECT_JWT:
+    pass
+
+
 def __copy_func_meta(to_func, from_func):
     """
     Copies the metadata from one function to another.
@@ -38,6 +43,40 @@ def __copy_func_meta(to_func, from_func):
     to_func.__name__ = from_func.__name__
     to_func.__doc__ = from_func.__doc__
 
+
+def __get_jwt_position(signature: inspect.Signature) -> Optional[inspect.Parameter]:
+    """
+    Gets the position of the JWT in the function signature.
+
+    :param signature: The function signature to check.
+    :return: para
+    """
+    for parameter in signature.parameters.values():
+        if parameter.annotation == __INJECT_JWT:
+            return parameter
+    return None
+
+def __get_replaced_sig(signature: inspect.Signature, param_name: str) -> Optional[inspect.Signature]:
+    """
+    Adds a JWT parameter to the function signature.
+
+    :param signature: The function signature to add the JWT parameter to.
+    :param param_name: The name of the parameter to add.
+    :return: The new function signature with the JWT parameter.
+    """
+    
+    jwt_parameter = inspect.Parameter(
+        param_name, 
+        inspect.Parameter.KEYWORD_ONLY, 
+        default=Depends(get_jwt),
+        annotation=__INJECT_JWT
+    )
+    new_parameters = [
+        *signature.parameters.values(),
+        jwt_parameter
+    ]
+
+    return signature.replace(parameters=new_parameters)
 
 def get_jwt(request: Request):
     """
@@ -51,24 +90,52 @@ def get_jwt(request: Request):
     yield jwt
 
 
+def require_roles(roles: list[str]):
+    """
+    A decorator that requires a specific role to be present in the JWT.
+
+    """
+    if roles is None or len(roles) == 0:
+        raise ValueError("Roles are required for this decorator.")
+
+    def decorator(func):
+        
+        async def wrapper(*args, __bitbuggy_role_jwt: __INJECT_JWT = Depends(get_jwt), **kwargs):
+            role_string = __bitbuggy_role_jwt["extension_roles"]
+
+            # Check roles
+            if role_string is None:
+                raise HTTPException(status_code=403, detail="Invalid role.")
+            if not all(role in role_string for role in roles):
+                raise HTTPException(status_code=403, detail="Invalid role.")
+
+            return await func(*args, **kwargs)
+
+        replaced_signature = __get_replaced_sig(inspect.signature(func), "__bitbuggy_role_jwt")
+        if replaced_signature is not None:
+            wrapper.__signature__ = replaced_signature
+        else:
+            wrapper.__signature__ = inspect.signature(func)
+
+        __copy_func_meta(wrapper, func)
+        # Add the roles to the docstring.
+        wrapper.__doc__ = f"{func.__doc__}\n\nRequires roles: {str.join(', ', roles)}"
+        return wrapper
+    return decorator
+    
+
 def require_scopes(scopes: list[str]):
     """
     A decorator that requires a specific scope to be present in the JWT.
-
     """
 
     if scopes is None or len(scopes) == 0:
         raise ValueError("Scopes are required for this decorator.")
 
     def decorator(func):
-        func_signature = inspect.signature(func)
-        replaced_parameters = [
-            *func_signature.parameters.values(),
-            inspect.Parameter("jwt", inspect.Parameter.POSITIONAL_OR_KEYWORD, default=Depends(get_jwt)),
-        ]
 
-        async def wrapper(*args, jwt: any = Depends(get_jwt), **kwargs):
-            scope_string = jwt["scp"]
+        async def wrapper(*args, __bitbuggy_scope_jwt: __INJECT_JWT = Depends(get_jwt), **kwargs):
+            scope_string = __bitbuggy_scope_jwt["scp"]
 
             # Check scopes
             if scope_string is None:
@@ -78,7 +145,12 @@ def require_scopes(scopes: list[str]):
 
             return await func(*args, **kwargs)
 
-        wrapper.__signature__ = func_signature.replace(parameters=replaced_parameters)
+        replaced_signature = __get_replaced_sig(inspect.signature(func), "__bitbuggy_scope_jwt")
+        if replaced_signature is not None:
+            wrapper.__signature__ = replaced_signature
+        else:
+            wrapper.__signature__ = inspect.signature(func)
+        
         __copy_func_meta(wrapper, func)
         # Add the scopes to the docstring.
         wrapper.__doc__ = f"{func.__doc__}\n\nRequires scopes: {str.join(', ', scopes)}"

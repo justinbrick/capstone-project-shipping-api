@@ -7,7 +7,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.middleware.authenticate import require_scopes
+from app.middleware.authenticate import require_roles, require_scopes
 from .. import get_db
 from ..database import shipments as db_shipments
 from ..shipping.models import CreateShipmentRequest, Provider, Shipment
@@ -31,6 +31,7 @@ async def create_shipment(request: CreateShipmentRequest, db: Session = Depends(
 
 @router.get("/{shipment_id}")
 @require_scopes(["Shipment.Read"])
+@require_roles(["Admin"])
 async def get_shipment(shipment_id: UUID, db: Session = Depends(get_db)) -> Shipment:
     """
     Get the shipment using a specific shipment ID.
