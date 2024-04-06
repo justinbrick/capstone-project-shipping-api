@@ -2,9 +2,11 @@
 This module contains the internal implementation of a shipment provider.
 """
 
+from uuid import UUID
+from app.shipping.enums import Provider
 from app.shipping.providers import ShipmentProvider
-from app.shipping.models import Shipment, ShipmentStatus
-from datetime import datetime
+from app.shipping.models import CreateShipmentRequest, Shipment, ShipmentStatus
+from datetime import datetime, timedelta
 
 
 class InternalShipmentProvider(ShipmentProvider):
@@ -13,16 +15,18 @@ class InternalShipmentProvider(ShipmentProvider):
     """
 
     def __init__(self) -> None:
+        self.provider_type = Provider.INTERNAL
+        self.speed_mult = 0.5
         pass
 
-    async def create_shipment(self, request: dict) -> Shipment:
+    async def create_shipment(self, request: CreateShipmentRequest) -> Shipment:
         return await super().create_shipment(request)
 
     async def get_shipment_status(self, tracking_identifier: str) -> ShipmentStatus:
         return await super().get_shipment_status(tracking_identifier)
-
-    async def get_estimated_delivery_date(self, from_address: str, to_address: str) -> datetime:
-        return await super().get_estimated_delivery_date(from_address, to_address)
+    
+    def create_random_id(self, associated: UUID) -> str:
+        return str(associated)
 
     async def get_shipment_location(self, tracking_identifier: str) -> str | None:
         return f"Package {tracking_identifier} is in North Carolina."

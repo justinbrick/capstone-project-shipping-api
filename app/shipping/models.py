@@ -28,6 +28,8 @@ class Shipment(BaseModel):
     """
     shipment_id: UUID
     """A unique identifier for the shipment."""
+    from_address: str
+    """The address that the shipment is coming from."""
     shipping_address: str
     """The address that the shipment is going to."""
     provider: Provider
@@ -36,8 +38,12 @@ class Shipment(BaseModel):
     """The ID that the provider has assigned to this shipment, for external references."""
     created_at: datetime
     """The time that this shipment was created."""
+    expected_at: datetime
+    """The time that this shipment is expected to be delivered."""
     delivered_at: Optional[datetime] = None
     """The time that this shipment was delivered."""
+    items: list[ShipmentItem]
+    """The items that are going to be shipped."""
 
     model_config = {
         # This is a flag to indicate that the model should be created from the attributes.
@@ -67,6 +73,19 @@ class Delivery(BaseModel):
     """The time that this delivery was fulfilled."""
     delivery_sla: SLA
     """The SLA that this delivery must adhere to."""
+
+
+class Return(BaseModel):
+    """
+    Represents a return, which contains the order ID associated to the return,
+    and a shipment which contains the items to be returned.
+    """
+    order_id: UUID
+    """The ID of the order that this return is associated with."""
+    return_id: UUID
+    """The ID of the return."""
+    shipment: Shipment
+    """The shipment that contains the items to be returned."""
 
 
 class DeliveryTimeResponse(BaseModel):
@@ -112,6 +131,8 @@ class CreateShipmentRequest(BaseModel):
     The shipment request model represents a request to create a shipment regarding a specific order.
     Usually used for returns & internal shipments.
     """
+    from_address: str 
+    """The address that the shipment is coming from."""
     shipping_address: str
     """The address that the shipment is going to."""
     items: list[ShipmentItem]
@@ -128,6 +149,8 @@ class CreateReturnRequest(BaseModel):
     """The ID of the order that this return request is associated with."""
     items: list[ShipmentItem]
     """The items in the order that are being returned."""
+    from_address: str
+    """The address that the return is coming from."""
 
 
 class ShipmentStatus(BaseModel):

@@ -30,6 +30,7 @@ class Shipment(Base):
     provider: Mapped[Provider]
     provider_shipment_id: Mapped[str] = mapped_column(VARCHAR(100))
     created_at: Mapped[datetime]
+    expected_at: Mapped[datetime]
     items: Mapped[list["ShipmentItem"]] = relationship()
 
 
