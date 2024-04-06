@@ -44,18 +44,6 @@ def __copy_func_meta(to_func, from_func):
     to_func.__doc__ = from_func.__doc__
 
 
-def __get_jwt_position(signature: inspect.Signature) -> Optional[inspect.Parameter]:
-    """
-    Gets the position of the JWT in the function signature.
-
-    :param signature: The function signature to check.
-    :return: para
-    """
-    for parameter in signature.parameters.values():
-        if parameter.annotation == __INJECT_JWT:
-            return parameter
-    return None
-
 def __get_replaced_sig(signature: inspect.Signature, param_name: str) -> Optional[inspect.Signature]:
     """
     Adds a JWT parameter to the function signature.
@@ -64,10 +52,10 @@ def __get_replaced_sig(signature: inspect.Signature, param_name: str) -> Optiona
     :param param_name: The name of the parameter to add.
     :return: The new function signature with the JWT parameter.
     """
-    
+
     jwt_parameter = inspect.Parameter(
-        param_name, 
-        inspect.Parameter.KEYWORD_ONLY, 
+        param_name,
+        inspect.Parameter.KEYWORD_ONLY,
         default=Depends(get_jwt),
         annotation=__INJECT_JWT
     )
@@ -77,6 +65,7 @@ def __get_replaced_sig(signature: inspect.Signature, param_name: str) -> Optiona
     ]
 
     return signature.replace(parameters=new_parameters)
+
 
 def get_jwt(request: Request):
     """
@@ -99,19 +88,20 @@ def require_roles(roles: list[str]):
         raise ValueError("Roles are required for this decorator.")
 
     def decorator(func):
-        
+
         async def wrapper(*args, __bitbuggy_role_jwt: __INJECT_JWT = Depends(get_jwt), **kwargs):
             role_string = __bitbuggy_role_jwt["extension_roles"]
 
             # Check roles
             if role_string is None:
                 raise HTTPException(status_code=403, detail="Invalid role.")
-            if not all(role in role_string for role in roles):
+            if not any(role in role_string for role in roles):
                 raise HTTPException(status_code=403, detail="Invalid role.")
 
             return await func(*args, **kwargs)
 
-        replaced_signature = __get_replaced_sig(inspect.signature(func), "__bitbuggy_role_jwt")
+        replaced_signature = __get_replaced_sig(
+            inspect.signature(func), "__bitbuggy_role_jwt")
         if replaced_signature is not None:
             wrapper.__signature__ = replaced_signature
         else:
@@ -122,7 +112,7 @@ def require_roles(roles: list[str]):
         wrapper.__doc__ = f"{func.__doc__}\n\nRequires roles: {str.join(', ', roles)}"
         return wrapper
     return decorator
-    
+
 
 def require_scopes(scopes: list[str]):
     """
@@ -145,12 +135,13 @@ def require_scopes(scopes: list[str]):
 
             return await func(*args, **kwargs)
 
-        replaced_signature = __get_replaced_sig(inspect.signature(func), "__bitbuggy_scope_jwt")
+        replaced_signature = __get_replaced_sig(
+            inspect.signature(func), "__bitbuggy_scope_jwt")
         if replaced_signature is not None:
             wrapper.__signature__ = replaced_signature
         else:
             wrapper.__signature__ = inspect.signature(func)
-        
+
         __copy_func_meta(wrapper, func)
         # Add the scopes to the docstring.
         wrapper.__doc__ = f"{func.__doc__}\n\nRequires scopes: {str.join(', ', scopes)}"
@@ -169,6 +160,7 @@ class EntraOAuth2Middleware:
     :param anonymous_endpoints: A list of endpoints that do not require authentication.
 
     """
+
     def __init__(self, app: ASGIApp, tenant_id: str, client_id: str, anonymous_endpoints: list[str] = []) -> None:
         self.app = app
         self.tenant_id = tenant_id
@@ -187,14 +179,16 @@ class EntraOAuth2Middleware:
         # Get the authorization as a bearer token, throw authorization error if it doesn't.
         authorization = headers.get("authorization")
         if authorization is None:
-            response = PlainTextResponse("Authorization header is required.", status_code=401)
+            response = PlainTextResponse(
+                "Authorization header is required.", status_code=401)
             await response(scope, receive, send)
             return
 
         # Get the token from the authorization header, verify it is bearer token.
         parts = authorization.split()
         if len(parts) != 2 or parts[0].lower() != "bearer":
-            response = PlainTextResponse("Invalid authorization header.", status_code=401)
+            response = PlainTextResponse(
+                "Invalid authorization header.", status_code=401)
             await response(scope, receive, send)
             return
 
@@ -221,17 +215,21 @@ class EntraOAuth2Middleware:
             jwt_keys = await get_json_keys()
             unverified_header = jwt.get_unverified_header(token)
 
-            accepted_keys = [key for key in jwt_keys if key["kid"] == unverified_header["kid"]]
+            accepted_keys = [
+                key for key in jwt_keys if key["kid"] == unverified_header["kid"]]
             if len(accepted_keys) == 0:
-                response = PlainTextResponse("Invalid token - unsigned.", status_code=401)
+                response = PlainTextResponse(
+                    "Invalid token - unsigned.", status_code=401)
                 await response(scope, receive, send)
                 return
             accepted_key = accepted_keys[0]
 
             # Convert accepted_key to PEM format
-            reformed_key = RSAAlgorithm.from_jwk(accepted_key).public_bytes(encoding=Encoding.PEM, format=PublicFormat.PKCS1)
+            reformed_key = RSAAlgorithm.from_jwk(accepted_key).public_bytes(
+                encoding=Encoding.PEM, format=PublicFormat.PKCS1)
             options = {"verify_exp": True, "verify_signature": True}
-            payload = jwt.decode(token, reformed_key, algorithms=["RS256"], audience=self.client_id, issuer=ISSUER_URL, options=options)
+            payload = jwt.decode(token, reformed_key, algorithms=[
+                                 "RS256"], audience=self.client_id, issuer=ISSUER_URL, options=options)
             # Hooray, they've passed verification!
             scope["jwt"] = payload
             await self.app(scope, receive, send)

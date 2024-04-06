@@ -39,9 +39,11 @@ class ShipmentDeliveryInfo(Base):
     A mapping of a shipment to it's delivery.
     """
     __tablename__ = "shipment_delivery_info"
-    shipment_id: Mapped[UUID] = mapped_column(ForeignKey("shipments.shipment_id"), primary_key=True)
+    shipment_id: Mapped[UUID] = mapped_column(
+        ForeignKey("shipments.shipment_id"), primary_key=True)
     """A shipment ID that is associated with the delivery."""
-    delivery_id: Mapped[UUID] = mapped_column(ForeignKey("deliveries.delivery_id"), primary_key=True)
+    delivery_id: Mapped[UUID] = mapped_column(
+        ForeignKey("deliveries.delivery_id"), primary_key=True)
     """A delivery ID that is associated with the shipment."""
 
 
@@ -81,7 +83,8 @@ class WarehouseItem(Base):
     An item that is stored in a warehouse.
     """
     __tablename__ = "warehouse_items"
-    warehouse_id: Mapped[UUID] = mapped_column(ForeignKey("warehouses.warehouse_id"), primary_key=True)
+    warehouse_id: Mapped[UUID] = mapped_column(
+        ForeignKey("warehouses.warehouse_id"), primary_key=True)
     upc: Mapped[int] = mapped_column(primary_key=True)
     stock: Mapped[int]
 
@@ -95,7 +98,8 @@ class Return(Base):
     """
     The ID of the return.
     """
-    shipment_id: Mapped[UUID] = mapped_column(ForeignKey("shipments.shipment_id"))
+    shipment_id: Mapped[UUID] = mapped_column(
+        ForeignKey("shipments.shipment_id"))
     """
     The ID of the associated shipment that is used to get a return package.
     """

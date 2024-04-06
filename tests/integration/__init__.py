@@ -14,8 +14,9 @@ jwt_content = {
     "name": "John Doe",
     "iat": int(datetime.now().timestamp()),
     "scp": "Shipment.Write Shipment.Read Shipment.Create",
-    "extension_roles": "Admin Test"
+    "extension_roles": "Admin,Test"
 }
 test_jwt = jwt.encode(jwt_content, "test")
 
-test_client = TestClient(app=app, headers={"Authorization": f"Bearer {test_jwt}"})
+test_client = TestClient(
+    app=app, headers={"Authorization": f"Bearer {test_jwt}"})

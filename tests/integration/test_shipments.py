@@ -21,7 +21,8 @@ def test_create_shipment():
     shipping_address = "Pilsbury Doughboy Lane"
     provider = "ups"
     items = []
-    response = test_client.post("/shipments/", json={"shipping_address": shipping_address, "provider": provider, "items": items})
+    response = test_client.post(
+        "/shipments/", json={"shipping_address": shipping_address, "provider": provider, "items": items})
     assert response.status_code == 200
     json = response.json()
     assert json["shipping_address"] == shipping_address
