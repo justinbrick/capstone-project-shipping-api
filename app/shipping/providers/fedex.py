@@ -2,7 +2,9 @@
 Mock FedEx tracking API
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import Any, Coroutine
+from uuid import UUID
 
 from app.shipping.enums import Provider
 from . import ShipmentProvider
@@ -27,10 +29,11 @@ class FedexShipmentProvider(ShipmentProvider):
 
     def __init__(self) -> None:
         self.provider_type = Provider.FEDEX
-        pass
+        self.speed_mult = 1.5
 
-    async def create_shipment(self, request: CreateShipmentRequest) -> Shipment:
-        return await super().create_shipment(request)
+    def create_random_id(self, associated: UUID) -> str:
+        # TODO: Needs true fedex tracking number
+        return associated
 
     async def get_shipment_status(self, tracking_identifier: str) -> ShipmentStatus:
         return await super().get_shipment_status(tracking_identifier)

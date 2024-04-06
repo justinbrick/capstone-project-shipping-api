@@ -2,6 +2,7 @@
 This module contains the USPS implementation of a shipment provider.
 """
 
+from uuid import UUID
 from app.shipping.enums import Provider
 from app.shipping.providers import ShipmentProvider
 from app.shipping.models import CreateShipmentRequest, Shipment, ShipmentStatus
@@ -18,6 +19,10 @@ class USPSShipmentProvider(ShipmentProvider):
 
     async def get_shipment_status(self, tracking_identifier: str) -> ShipmentStatus:
         return await super().get_shipment_status(tracking_identifier)
+
+    def create_random_id(self, associated: UUID) -> str:
+        # TODO: Needs true usps tracking number
+        return associated
 
     async def get_shipment_location(self, tracking_identifier: str) -> str | None:
         return f"Package {tracking_identifier} is in North Carolina."
