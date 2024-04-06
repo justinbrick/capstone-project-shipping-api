@@ -50,3 +50,17 @@ async def create_order_delivery(order_id: UUID, delivery: CreateDeliveryRequest,
     db.refresh(db_delivery)
 
     return db_delivery
+
+@router.get("/{order_id}/returns")
+async def get_order_returns(order_id: UUID, db: Session = Depends(get_db)) -> list[Delivery]:
+    """
+    Get all the returns for a given order.
+    """
+    """returns = db.query(schemas.Return)\
+        .where(schemas.Return.order_id == order_id)\
+        .all()"""
+
+    if len(returns) == 0:
+        raise HTTPException(status_code=404, detail="No returns found for the given order.")
+
+    return returns

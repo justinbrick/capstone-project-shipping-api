@@ -11,6 +11,7 @@ from app.middleware.authenticate import require_roles, require_scopes
 from .. import get_db
 from ..database import shipments as db_shipments
 from ..shipping.models import CreateShipmentRequest, Provider, Shipment
+from ..shipping.delivery import available_providers as shipping_providers
 
 router = APIRouter()
 
@@ -52,20 +53,7 @@ async def get_shipment_status(shipment_id: UUID, db: Session = Depends(get_db)):
     As a result, it is volatile depending on the provider.
     """
     shipment = await get_shipment(shipment_id, db)
-    match shipment.provider:
-        case Provider.INTERNAL:
-            pass
-        case Provider.UPS:
-            pass
-        case Provider.FEDEX:
-            pass
-        case Provider.USPS:
-            pass
-        case _:
-            raise HTTPException(status_code=400, detail="Invalid provider.\nValid Providers: " +
-                                ", ".join([provider.value for provider in Provider]))
+    provider = shipping_providers[shipment.provider]
+
     raise HTTPException(
         status_code=500, detail="Could not get shipment status. Has this provider been implemented?")
-
-
-"Could the about function get rid of the match statement and just call the get_shipment_request function?"
