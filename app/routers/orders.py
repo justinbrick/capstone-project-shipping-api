@@ -7,6 +7,7 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.routers.deliveries import get_delivery_shipments
 from app.shipping.enums import Provider
 
 from ..database import schemas
@@ -26,10 +27,19 @@ async def get_order_deliveries(order_id: UUID, db: Session = Depends(get_db)) ->
         .where(schemas.Delivery.order_id == order_id)\
         .all()
 
-    if len(deliveries) == 0:
-        raise HTTPException(status_code=404, detail="No deliveries found for the given order.")
+    delivery_models: list[Delivery] = []
+    for db_delivery in deliveries:
+        delivery_shipments = await get_delivery_shipments(db_delivery.delivery_id, db)
 
-    return deliveries
+        delivery_models.append(Delivery(
+            delivery_id=db_delivery.delivery_id,
+            order_id=db_delivery.order_id,
+            created_at=db_delivery.created_at,
+            fulfilled_at=db_delivery.fulfilled_at,
+            delivery_sla=db_delivery.delivery_sla,
+            shipments=delivery_shipments
+        ))
+    return delivery_models
 
 
 @router.post("/{order_id}/deliveries", status_code=201)
@@ -40,17 +50,17 @@ async def create_order_delivery(order_id: UUID, delivery: CreateDeliveryRequest,
     delivery_id = uuid4()
     # TODO: Logic to get items from cart and break them down into shipments.
 
+    dump = delivery.model_dump(exclude=["items"])
     created_at = datetime.now()
     db_delivery = schemas.Delivery(
         delivery_id=delivery_id,
         order_id=order_id,
         created_at=created_at,
-        delivery_sla=delivery.delivery_sla
+        **dump
     )
 
     db.add(db_delivery)
     db.commit()
-    db.refresh(db_delivery)
 
     return db_delivery
 
@@ -102,9 +112,9 @@ async def create_order_return(order_id: UUID, return_request: CreateReturnReques
         schemas.ShipmentItem(
             shipment_id=shipment.shipment_id,
             upc=item.upc,
-            stock=item.stock) 
-            for item in shipment.items]
-    
+            stock=item.stock)
+        for item in shipment.items]
+
     db.add_all(db_shipment_items)
     db.commit()
 

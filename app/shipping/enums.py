@@ -29,7 +29,11 @@ class SLA(Enum):
     """
     The service level agreement enum represents the different service level agreements that a shipment can be under.
     """
-    STANDARD = "standard"  # 3-5 days
-    EXPRESS = "express"  # 1-2 days
-    OVERNIGHT = "overnight"  # 1 day
-    SAME_DAY = "same_day"  # Same day
+    STANDARD = "standard"
+    # 3-5 days
+    EXPRESS = "express"
+    # 1-2 days
+    OVERNIGHT = "overnight"
+    # 1 day
+    SAME_DAY = "same_day"
+    # Same day

@@ -16,27 +16,13 @@ from ..shipping.delivery import available_providers as shipping_providers
 router = APIRouter()
 
 
-@router.post("/")
-@require_scopes(["Shipment.Create"])
-async def create_shipment(request: CreateShipmentRequest, db: Session = Depends(get_db)) -> Shipment:
-    """
-    Creates a shipment, given the request.
-    """
-    try:
-        shipment = db_shipments.create_shipment(db, request)
-        return shipment
-    except Exception as exc:
-        raise HTTPException(
-            status_code=500, detail="Could not create shipment.") from exc
-
-
 @router.get("/{shipment_id}")
 @require_scopes(["Shipment.Read"])
 @require_roles(["Admin"])
 async def get_shipment(shipment_id: UUID, db: Session = Depends(get_db)) -> Shipment:
     """
     Get the shipment using a specific shipment ID.
-    This is the internal shipment - not the status of the shipment.
+    This is the actual shipment - not the status of the shipment.
     """
     shipment = db_shipments.get_shipment(db, shipment_id)
     if shipment is None:

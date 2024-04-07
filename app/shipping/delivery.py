@@ -4,9 +4,9 @@ Business logic regarding the delivery of shipments.
 
 from datetime import datetime, timedelta
 from random import choice
-from app.database.schemas import Warehouse
-from app.inventory.warehouse import get_nearest_warehouses, get_warehouse_stock
-from app.shipping.models import DeliveryTimeResponse, ShipmentDeliveryBreakdown, ShipmentItem
+from uuid import UUID
+from app.inventory.warehouse import get_warehouse, get_warehouse_chunks
+from app.shipping.models import CreateDeliveryRequest, DeliveryTimeResponse, Shipment, ShipmentDeliveryBreakdown, ShipmentItem
 from .enums import SLA, Provider
 from .providers import ShipmentProvider, fedex, internal, ups, usps
 
@@ -18,18 +18,61 @@ available_providers: dict[Provider, ShipmentProvider] = {
     Provider.INTERNAL: internal.client
 }
 
+sla_times: dict[SLA, timedelta] = {
+    SLA.STANDARD: timedelta(days=5),
+    SLA.EXPRESS: timedelta(days=2),
+    SLA.OVERNIGHT: timedelta(days=1)
+}
 
-async def get_delivery_breakdown(address: str, sla: SLA, items: list[ShipmentItem]) -> list[DeliveryTimeResponse]:
+
+async def get_delivery_breakdown(recipient_address: str, sla: SLA, items: list[ShipmentItem]) -> ShipmentDeliveryBreakdown:
     """
-    Get a delivery breakdown given a specific SLA and items.
+    Get a delivery breakdown for a specific order.
     """
-    # Logic to determine the delivery breakdown.
-    delivery_times: list[DeliveryTimeResponse] = []
-    nearest_warehouses = await get_nearest_warehouses(address)
-    warehouse_chunks: dict[Warehouse, list[ShipmentItem]] = {}
-    """For each warehouse, get the available warehouse."""
-    for warehouse in nearest_warehouses:
-        # TODO: improve get_warehouse_stock
-        warehouse_stock = await get_warehouse_stock(warehouse.warehouse_id, [item.upc for item in items])
-        warehouse_chunks[warehouse] = warehouse_stock
-    return delivery_times
+    # Get the expected delivery time.
+    expected_at = datetime.now() + sla_times[sla]
+    can_meet_sla = True
+    warehouse_chunks = await get_warehouse_chunks(recipient_address, items)
+    delivery_times = []
+
+    for chunk in warehouse_chunks:
+        warehouse = await get_warehouse(chunk.warehouse_id)
+        fastest_provider = None
+        fastest_time = timedelta.max
+
+        for provider, client in available_providers.items():
+            delivery_time = await client.get_delivery_time(
+                warehouse.address, recipient_address)
+
+            if delivery_time < fastest_time:
+                fastest_time = delivery_time
+                fastest_provider = provider
+
+            if delivery_time < sla_times[sla]:
+                # If we are within the SLA, we can meet it.
+                break
+
+        if fastest_time > sla_times[sla]:
+            can_meet_sla = False
+
+        delivery_times.append(DeliveryTimeResponse(
+            provider=fastest_provider.provider,
+            delivery_time=fastest_time,
+            items=chunk.items
+        ))
+
+    return ShipmentDeliveryBreakdown(
+        recipient_address=recipient_address,
+        expected_at=expected_at,
+        can_meet_sla=can_meet_sla,
+        delivery_times=delivery_times
+    )
+
+
+async def create_delivery_shipments(request: CreateDeliveryRequest) -> list[Shipment]:
+    """
+    Create the delivery orders for the request.
+    """
+    breakdown = await get_delivery_breakdown(request.recipient_address, request.delivery_sla, request.items)
+    if not breakdown.can_meet_sla:
+        raise ValueError("Cannot meet SLA")

@@ -4,11 +4,14 @@ This base class is used to create the tables and metadata for the database.
 All models must inherit from this base class, or it won't be created.
 """
 
+from typing import Optional
 from uuid import UUID
 from datetime import datetime
 
 from sqlalchemy import ForeignKey, VARCHAR
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+from app.shipping.enums import SLA
 
 from ..shipping.models import Provider, Status
 
@@ -26,6 +29,7 @@ class Shipment(Base):
     """
     __tablename__ = "shipments"
     shipment_id: Mapped[UUID] = mapped_column(primary_key=True)
+    from_address: Mapped[str] = mapped_column(VARCHAR(255))
     shipping_address: Mapped[str] = mapped_column(VARCHAR(255))
     provider: Mapped[Provider]
     provider_shipment_id: Mapped[str] = mapped_column(VARCHAR(100))
@@ -68,7 +72,7 @@ class Delivery(Base):
     """
     The date and time that the delivery was fulfilled.
     """
-    delivery_sla: Mapped[str] = mapped_column(VARCHAR(100))
+    delivery_sla: Mapped[SLA]
     """
     The service level agreement that the delivery is under.
     """

@@ -52,21 +52,17 @@ class Shipment(BaseModel):
     }
 
 
-class DeliveryShipment(Shipment):
-    """
-    A shipment that is created for a delivery.
-    """
-    delivery_id: UUID
-    """The ID of the delivery that this shipment is associated with."""
-
-
 class Delivery(BaseModel):
     """
     Represents a full delivery, composed of the individual orders.
     This is a simple composite model to represent all the orders that this is made of.
     """
+    delivery_id: UUID
+    """The ID of the delivery."""
     order_id: UUID
     """The ID of the order that this delivery is associated with."""
+    shipments: list[Shipment]
+    """The shipments that are associated with this delivery."""
     created_at: datetime
     """The time that this delivery was created."""
     fulfilled_at: Optional[datetime] = None
@@ -104,8 +100,6 @@ class ShipmentDeliveryBreakdown(BaseModel):
     """
     Provides a breakdown of the delivery times and shipping providers, given a specific order.
     """
-    order_id: UUID
-    """The ID of the order that this delivery breakdown is associated with."""
     recipient_address: str
     """The address that the delivery is going to."""
     expected_at: datetime
@@ -131,7 +125,7 @@ class CreateShipmentRequest(BaseModel):
     The shipment request model represents a request to create a shipment regarding a specific order.
     Usually used for returns & internal shipments.
     """
-    from_address: str 
+    from_address: str
     """The address that the shipment is coming from."""
     shipping_address: str
     """The address that the shipment is going to."""
