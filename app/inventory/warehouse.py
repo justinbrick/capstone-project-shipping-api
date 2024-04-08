@@ -39,7 +39,7 @@ async def get_warehouse(warehouse_id: UUID) -> Warehouse:
     """
     """TEST IMPL, VOLATILE!"""
     with Session() as db:
-        warehouse = db.query(Warehouse).get(warehouse_id)
+        warehouse = db.get(Warehouse, warehouse_id)
         return warehouse
 
     response = await client.get(f"/warehouses/{warehouse_id}")

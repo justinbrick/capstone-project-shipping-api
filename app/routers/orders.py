@@ -14,7 +14,7 @@ from app.shipping.shipment import create_shipment
 
 from ..database import schemas
 from app import get_db
-from ..shipping.models import CreateDeliveryRequest, CreateReturnRequest, CreateShipmentRequest, Delivery, Return
+from ..shipping.models import CreateDeliveryRequest, CreateReturnRequest, CreateShipmentRequest, Delivery, Return, Shipment
 from ..shipping.providers.internal import client as internal_shipping
 
 router = APIRouter()
@@ -65,6 +65,8 @@ async def create_order_delivery(order_id: UUID, request: CreateDeliveryRequest, 
                     "breakdown": delivery_breakdown}
         )
 
+    shipments: list[Shipment] = []
+    delivery_infos: list[schemas.ShipmentDeliveryInfo] = []
     for delivery_time in delivery_breakdown.delivery_times:
         shipment_request = CreateShipmentRequest(
             order_id=order_id,
@@ -74,12 +76,14 @@ async def create_order_delivery(order_id: UUID, request: CreateDeliveryRequest, 
             provider=delivery_time.provider
         )
 
+        # Create the shipment and add it to the list of shipment for the model.
         shipment = await create_shipment(shipment_request)
+        shipments.append(shipment)
 
-        db_shipment = schemas.Shipment(
-            **shipment.model_dump(exclude=["items"])
+        # Create status and items for the shipment.
+        db_status = schemas.ShipmentStatus(
+            **shipment.status.model_dump()
         )
-
         db_shipment_items = [
             schemas.ShipmentItem(
                 shipment_id=shipment.shipment_id,
@@ -87,9 +91,20 @@ async def create_order_delivery(order_id: UUID, request: CreateDeliveryRequest, 
                 stock=item.stock)
             for item in shipment.items]
 
-        db.add(db_shipment)
-        db.add_all(db_shipment_items)
-        db.commit()
+        # Create the shipment model and add it to the list of delivery infos.
+        db_shipment = schemas.Shipment(
+            **shipment.model_dump(exclude=["items", "status"]),
+            status=db_status,
+            items=db_shipment_items
+        )
+
+        delivery_infos.append(
+            schemas.ShipmentDeliveryInfo(
+                shipment_id=shipment.shipment_id,
+                shipment=db_shipment,
+                delivery_id=delivery_id
+            )
+        )
 
     dump = request.model_dump(exclude=["items"])
     created_at = datetime.now()
@@ -97,13 +112,21 @@ async def create_order_delivery(order_id: UUID, request: CreateDeliveryRequest, 
         delivery_id=delivery_id,
         order_id=order_id,
         created_at=created_at,
-        **dump
+        **dump,
+        delivery_shipments=delivery_infos
     )
 
     db.add(db_delivery)
     db.commit()
 
-    return db_delivery
+    return Delivery(
+        delivery_id=delivery_id,
+        order_id=order_id,
+        created_at=created_at,
+        shipments=shipments,
+
+        **dump,
+    )
 
 
 @router.get("/{order_id}/returns")

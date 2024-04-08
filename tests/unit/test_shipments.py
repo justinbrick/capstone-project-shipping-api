@@ -14,29 +14,6 @@ from app.inventory.warehouse import get_nearest_warehouses
 from app.shipping.models import CreateDeliveryRequest, CreateShipmentRequest, Provider, ShipmentItem
 
 
-random_streets = [
-    "Pilsbury Doughboy Lane",
-    "Sesame Street",
-    "Elm Street",
-    "Baker Street",
-    "Wallaby Way",
-    "Infinity Loop"
-]
-
-
-def gen_random_address() -> str:
-    return f"{randint(1, 1000)} {choice(random_streets)}"
-
-
-def gen_fake_shipment_request() -> CreateShipmentRequest:
-    return CreateShipmentRequest(
-        from_address=gen_random_address(),
-        shipping_address=gen_random_address(),
-        provider=choice(list(Provider)),
-        items=[]
-    )
-
-
 @pytest.mark.asyncio
 async def test_create_delivery(session):
     """
@@ -57,11 +34,10 @@ async def test_create_delivery(session):
     assert delivery.delivery_sla == request.delivery_sla
     assert len(delivery.shipments) == 2
     assert delivery.created_at is not None
-    assert delivery.fulfilled_at is None
 
 
 @pytest.mark.asyncio
-async def test_get_nearest_warehouses(db):
+async def test_get_nearest_warehouses():
     """
     Tests a known location to ensure the nearest warehouses are returned.
     """

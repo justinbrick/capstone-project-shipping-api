@@ -20,6 +20,31 @@ class ShipmentItem(BaseModel):
     stock: int
     """The amount requested for this item."""
 
+    model_config = {
+        "from_attributes": True
+    }
+
+
+class ShipmentStatus(BaseModel):
+    """
+    The status of a shipment
+    Due to varying sources of shipment delivery, this must be put into one unified response.
+    """
+    shipment_id: UUID
+    """The ID of the shipment that this status is associated with."""
+    expected_at: datetime
+    """The time that this shipment is expected to be delivered."""
+    updated_at: datetime
+    """The time that this status was last updated. If more than 30 minutes have passed, the status will get updated."""
+    delivered_at: Optional[datetime] = None
+    """The time that this shipment was delivered."""
+    message: Status
+    """The status of the shipment."""
+
+    model_config = {
+        "from_attributes": True
+    }
+
 
 class Shipment(BaseModel):
     """
@@ -38,12 +63,10 @@ class Shipment(BaseModel):
     """The ID that the provider has assigned to this shipment, for external references."""
     created_at: datetime
     """The time that this shipment was created."""
-    expected_at: datetime
-    """The time that this shipment is expected to be delivered."""
-    delivered_at: Optional[datetime] = None
-    """The time that this shipment was delivered."""
     items: list[ShipmentItem]
     """The items that are going to be shipped."""
+    status: ShipmentStatus
+    """The status of the shipment."""
 
     model_config = {
         # This is a flag to indicate that the model should be created from the attributes.
@@ -65,8 +88,6 @@ class Delivery(BaseModel):
     """The shipments that are associated with this delivery."""
     created_at: datetime
     """The time that this delivery was created."""
-    fulfilled_at: Optional[datetime] = None
-    """The time that this delivery was fulfilled."""
     delivery_sla: SLA
     """The SLA that this delivery must adhere to."""
 
@@ -149,14 +170,3 @@ class CreateReturnRequest(BaseModel):
     """The items in the order that are being returned."""
     from_address: str
     """The address that the return is coming from."""
-
-
-class ShipmentStatus(BaseModel):
-    """
-    The status of a shipment
-    Due to varying sources of shipment delivery, this must be put into one unified response.
-    """
-    order_id: UUID
-    """The ID of the order that this shipment status is associated with."""
-    status: Status
-    """The status of the shipment."""

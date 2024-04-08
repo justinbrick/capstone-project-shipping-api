@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from uuid import UUID, uuid4
 from geopy.distance import geodesic
 
-from app.shipping.enums import Provider
+from app.shipping.enums import Provider, Status
 from ..models import Shipment, ShipmentStatus, CreateShipmentRequest
 from app.shipping.location import get_address_coordinates
 
@@ -32,7 +32,6 @@ class ShipmentProvider(ABC):
         """
         raise NotImplementedError()
 
-
     async def get_shipment_location(self, tracking_identifier: str) -> str | None:
         """
         Get the location of a shipment using a tracking identifier.
@@ -40,7 +39,6 @@ class ShipmentProvider(ABC):
         :return: the location of the shipment
         """
         return None
-
 
     async def create_shipment(self, request: CreateShipmentRequest) -> Shipment:
         """
@@ -60,12 +58,16 @@ class ShipmentProvider(ABC):
             provider=self.provider_type,
             provider_shipment_id=self.create_random_id(shipment_id),
             created_at=created_at,
-            expected_at=expected_at,
-            items=request.items
+            items=request.items,
+            status=ShipmentStatus(
+                shipment_id=shipment_id,
+                expected_at=expected_at,
+                updated_at=created_at,
+                message=Status.PENDING
+            )
         )
 
         return shipment
-
 
     @abstractmethod
     def create_random_id(self, associated: UUID) -> str:
@@ -77,7 +79,6 @@ class ShipmentProvider(ABC):
         :return: a random shipment ID
         """
         raise NotImplementedError()
-    
 
     async def get_delivery_time(self, to_address: str, from_address: str) -> timedelta:
         """

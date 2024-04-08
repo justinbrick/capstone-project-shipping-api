@@ -19,6 +19,7 @@ class Status(Enum):
     """
     The shipment status enum represents the different statuses that a shipment can be in.
     """
+    PENDING = "pending"
     SHIPPED = "shipped"
     IN_TRANSIT = "in_transit"
     DELIVERED = "delivered"

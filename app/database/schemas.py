@@ -34,8 +34,8 @@ class Shipment(Base):
     provider: Mapped[Provider]
     provider_shipment_id: Mapped[str] = mapped_column(VARCHAR(100))
     created_at: Mapped[datetime]
-    expected_at: Mapped[datetime]
     items: Mapped[list["ShipmentItem"]] = relationship()
+    status: Mapped["ShipmentStatus"] = relationship()
 
 
 class ShipmentDeliveryInfo(Base):
@@ -46,6 +46,8 @@ class ShipmentDeliveryInfo(Base):
     shipment_id: Mapped[UUID] = mapped_column(
         ForeignKey("shipments.shipment_id"), primary_key=True)
     """A shipment ID that is associated with the delivery."""
+    shipment: Mapped[Shipment] = relationship()
+    """The shipment that is associated with the delivery."""
     delivery_id: Mapped[UUID] = mapped_column(
         ForeignKey("deliveries.delivery_id"), primary_key=True)
     """A delivery ID that is associated with the shipment."""
@@ -57,29 +59,19 @@ class Delivery(Base):
     """
     __tablename__ = "deliveries"
     delivery_id: Mapped[UUID] = mapped_column(primary_key=True)
-    """
-    The ID of the delivery.
-    """
+    """The ID of the delivery."""
     order_id: Mapped[UUID]
-    """
-    The ID of the order that is associated with the delivery.
-    """
+    """The ID of the order that is associated with the delivery."""
+    recipient_address: Mapped[str] = mapped_column(VARCHAR(255))
+    """The address that the delivery is going to."""
     created_at: Mapped[datetime]
-    """
-    The date and time that the delivery was created.
-    """
+    """The date and time that the delivery was created."""
     fulfilled_at: Mapped[datetime] = mapped_column(nullable=True)
-    """
-    The date and time that the delivery was fulfilled.
-    """
+    """The date and time that the delivery was fulfilled."""
     delivery_sla: Mapped[SLA]
-    """
-    The service level agreement that the delivery is under.
-    """
+    """The service level agreement that the delivery is under."""
     delivery_shipments: Mapped[list["ShipmentDeliveryInfo"]] = relationship()
-    """
-    The shipments that are associated with the delivery.
-    """
+    """The shipments that are associated with the delivery."""
 
 
 class WarehouseItem(Base):
@@ -129,8 +121,11 @@ class ShipmentItem(Base):
     __tablename__ = "shipment_items"
     shipment_id: Mapped[UUID] = mapped_column(
         ForeignKey("shipments.shipment_id"), primary_key=True)
+    """The ID of the shipment that this item is associated with."""
     upc: Mapped[int] = mapped_column(primary_key=True)
+    """The UPC of the item."""
     stock: Mapped[int]
+    """The amount requested for this item."""
 
 
 class ShipmentStatus(Base):
@@ -142,7 +137,15 @@ class ShipmentStatus(Base):
     shipment_id: Mapped[UUID] = mapped_column(
         ForeignKey("shipments.shipment_id"), primary_key=True
     )
-    status_message: Mapped[Status]
+    """The ID of the shipment that this status is associated with."""
+    message: Mapped[Status]
+    """The status of the shipment."""
+    expected_at: Mapped[datetime]
+    """The expected time that the shipment should be delivered."""
+    updated_at: Mapped[datetime]
+    """The last time that the status was updated."""
+    delivered_at: Mapped[Optional[datetime]]
+    """The time that the shipment was delivered, or None if not delivered."""
 
 
 class Warehouse(Base):
@@ -151,10 +154,15 @@ class Warehouse(Base):
     """
     __tablename__ = "warehouses"
     warehouse_id: Mapped[UUID] = mapped_column(primary_key=True)
+    """The ID of the warehouse."""
     address: Mapped[str] = mapped_column(VARCHAR(255))
+    """The address of the warehouse."""
     latitude: Mapped[float]
+    """The latitude of the warehouse."""
     longitude: Mapped[float]
+    """The longitude of the warehouse."""
     items: Mapped[list["WarehouseItem"]] = relationship()
+    """The items that are stored in the warehouse."""
 
 
 class MockShipmentIDs(Base):
@@ -164,4 +172,4 @@ class MockShipmentIDs(Base):
     __tablename__ = "mock_shipment_ids"
     shipment_id: Mapped[UUID] = mapped_column(primary_key=True)
     tracking_number: Mapped[int]
-    status: Mapped[Status] = mapped_column(VARCHAR(100))
+    message: Mapped[Status] = mapped_column(VARCHAR(100))
