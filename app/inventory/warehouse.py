@@ -116,7 +116,12 @@ async def get_warehouse_chunks(address: str, items: list[ShipmentItem]) -> list[
     items_left = [item.model_copy() for item in items if item.stock > 0]
     nearest_warehouses = await get_nearest_warehouses(address)
     warehouse_chunks = []
+
     for warehouse in nearest_warehouses:
+
+        if len(items_left) == 0:
+            break
+
         warehouse_stock = await get_warehouse_stock_availability(warehouse.warehouse_id, items_left)
         warehouse_chunks.append(warehouse_stock)
         items_left = [item for item in items_left if item.stock > 0]

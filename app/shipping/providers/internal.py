@@ -24,7 +24,7 @@ class InternalShipmentProvider(ShipmentProvider):
 
     async def get_shipment_status(self, tracking_identifier: str) -> ShipmentStatus:
         return await super().get_shipment_status(tracking_identifier)
-    
+
     def create_random_id(self, associated: UUID) -> str:
         return str(associated)
 

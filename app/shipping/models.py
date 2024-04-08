@@ -88,6 +88,8 @@ class DeliveryTimeResponse(BaseModel):
     """
     Represents the response with delivery time, items, stock, and the provider.
     """
+    from_address: str
+    """The address of the warehouse that the delivery is coming from."""
     delivery_time: datetime
     """The time that the delivery is expected to be delivered."""
     items: list[ShipmentItem]
@@ -114,6 +116,8 @@ class CreateDeliveryRequest(BaseModel):
     """
     A request to create a delivery. A delivery is based under an order, and can have multiple shipments.
     """
+    recipient_address: str
+    """The address that the delivery is going to."""
     delivery_sla: SLA
     """The SLA that this delivery request must adhere to."""
     items: list[ShipmentItem]

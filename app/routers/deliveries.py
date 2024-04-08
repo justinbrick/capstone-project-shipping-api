@@ -7,7 +7,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app import get_db
-from app.shipping.models import CreateDeliveryRequest, Delivery, Shipment
+from app.shipping.delivery import get_delivery_breakdown
+from app.shipping.models import CreateDeliveryRequest, Delivery, Shipment, ShipmentDeliveryBreakdown
 from app.database import schemas
 
 
@@ -25,3 +26,12 @@ async def get_delivery_shipments(delivery_id: UUID, db: Session = Depends(get_db
         .all()
 
     return shipments
+
+
+@router.post("/breakdown")
+async def make_delivery_breakdown(request: CreateDeliveryRequest) -> ShipmentDeliveryBreakdown:
+    """
+    Make a delivery breakdown with the given request.
+    """
+    breakdown = await get_delivery_breakdown(request.recipient_address, request.delivery_sla, request.items)
+    return breakdown

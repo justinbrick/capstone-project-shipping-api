@@ -21,7 +21,8 @@ available_providers: dict[Provider, ShipmentProvider] = {
 sla_times: dict[SLA, timedelta] = {
     SLA.STANDARD: timedelta(days=5),
     SLA.EXPRESS: timedelta(days=2),
-    SLA.OVERNIGHT: timedelta(days=1)
+    SLA.OVERNIGHT: timedelta(days=1),
+    SLA.SAME_DAY: timedelta(hours=12)
 }
 
 
@@ -33,16 +34,16 @@ async def get_delivery_breakdown(recipient_address: str, sla: SLA, items: list[S
     expected_at = datetime.now() + sla_times[sla]
     can_meet_sla = True
     warehouse_chunks = await get_warehouse_chunks(recipient_address, items)
-    delivery_times = []
+    delivery_times: list[DeliveryTimeResponse] = []
 
     for chunk in warehouse_chunks:
         warehouse = await get_warehouse(chunk.warehouse_id)
-        fastest_provider = None
+        fastest_provider: Provider | None = None
         fastest_time = timedelta.max
 
         for provider, client in available_providers.items():
             delivery_time = await client.get_delivery_time(
-                warehouse.address, recipient_address)
+                recipient_address, warehouse.address)
 
             if delivery_time < fastest_time:
                 fastest_time = delivery_time
@@ -56,16 +57,18 @@ async def get_delivery_breakdown(recipient_address: str, sla: SLA, items: list[S
             can_meet_sla = False
 
         delivery_times.append(DeliveryTimeResponse(
-            provider=fastest_provider.provider,
-            delivery_time=fastest_time,
-            items=chunk.items
+            provider=fastest_provider,
+            delivery_time=datetime.now()+fastest_time,
+            items=chunk.items,
+            warehouse_id=chunk.warehouse_id,
+            from_address=warehouse.address
         ))
 
     return ShipmentDeliveryBreakdown(
         recipient_address=recipient_address,
         expected_at=expected_at,
         can_meet_sla=can_meet_sla,
-        delivery_times=delivery_times
+        delivery_times=delivery_times,
     )
 
 

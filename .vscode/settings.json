@@ -2,5 +2,10 @@
     "pylint.args": [
         "--disable=W0613",
         "--disable=C0301",
-    ]
+    ],
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }

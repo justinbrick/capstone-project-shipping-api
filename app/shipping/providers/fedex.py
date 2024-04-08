@@ -3,6 +3,7 @@ Mock FedEx tracking API
 """
 
 from datetime import datetime, timedelta
+import random
 from typing import Any, Coroutine
 from uuid import UUID
 
@@ -33,7 +34,10 @@ class FedexShipmentProvider(ShipmentProvider):
 
     def create_random_id(self, associated: UUID) -> str:
         # TODO: Needs true fedex tracking number
-        return associated
+        random_id = ''.join(random.choices('0123456789ABCDEF', k=6))
+        random_digits = ''.join(random.choices('0123456789', k=8))
+        # 3E for economy
+        return f"1Z{random_id}3E{random_digits}"
 
     async def get_shipment_status(self, tracking_identifier: str) -> ShipmentStatus:
         return await super().get_shipment_status(tracking_identifier)

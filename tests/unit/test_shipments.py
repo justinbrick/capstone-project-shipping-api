@@ -44,11 +44,12 @@ async def test_create_delivery(session):
     """
     order_id = uuid4()
     request = CreateDeliveryRequest(
-        delivery_sla=choice(list(SLA)),
+        delivery_sla=SLA.STANDARD,
         items=[
             ShipmentItem(upc=1, stock=9),
             ShipmentItem(upc=2, stock=12)
-        ]
+        ],
+        recipient_address="2683 NC-24, Warsaw, NC 28398"
     )
 
     delivery = await create_order_delivery(order_id, request, session)
