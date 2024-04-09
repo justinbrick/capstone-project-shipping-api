@@ -11,7 +11,7 @@ from .enums import SLA, Provider
 from .providers import ShipmentProvider, fedex, internal, ups, usps
 
 
-available_providers: dict[Provider, ShipmentProvider] = {
+shipping_providers: dict[Provider, ShipmentProvider] = {
     Provider.FEDEX: fedex.client,
     Provider.UPS: ups.client,
     Provider.USPS: usps.client,
@@ -41,7 +41,7 @@ async def get_delivery_breakdown(recipient_address: str, sla: SLA, items: list[S
         fastest_provider: Provider | None = None
         fastest_time = timedelta.max
 
-        for provider, client in available_providers.items():
+        for provider, client in shipping_providers.items():
             delivery_time = await client.get_delivery_time(
                 recipient_address, warehouse.address)
 

@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.inventory.warehouse import add_warehouse_stock, remove_warehouse_stock
-from app.routers.deliveries import get_delivery_shipments
+from app.routers.deliveries import get_delivery_shipments, make_delivery_breakdown
 from app.shipping.delivery import get_delivery_breakdown
 from app.shipping.enums import Provider
 from app.shipping.shipment import create_shipment
@@ -56,11 +56,7 @@ async def create_order_delivery(order_id: UUID, request: CreateDeliveryRequest, 
     :param request: the request to create the delivery
     """
     # We first need to get the delivery breakdown to see if we can meet the SLA.
-    delivery_breakdown = await get_delivery_breakdown(
-        request.recipient_address,
-        request.delivery_sla,
-        request.items
-    )
+    delivery_breakdown = await make_delivery_breakdown(request)
 
     # If we cannot meet the SLA, we should return an error.
     if not delivery_breakdown.can_meet_sla:

@@ -8,10 +8,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.middleware.authenticate import require_roles, require_scopes
-from .. import get_db
-from ..database import shipments as db_shipments
-from ..shipping.models import CreateShipmentRequest, Provider, Shipment
-from ..shipping.delivery import available_providers as shipping_providers
+from app import get_db
+from app.shipping.models import Shipment, ShipmentStatus
+from app.shipping.delivery import shipping_providers as shipping_providers
+from app.database import schemas
 
 router = APIRouter()
 
@@ -24,7 +24,7 @@ async def get_shipment(shipment_id: UUID, db: Session = Depends(get_db)) -> Ship
     Get the shipment using a specific shipment ID.
     This is the actual shipment - not the status of the shipment.
     """
-    shipment = db_shipments.get_shipment(db, shipment_id)
+    shipment = db.get(schemas.Shipment, shipment_id)
     if shipment is None:
         raise HTTPException(status_code=404, detail="Shipment not found.")
     return shipment
@@ -32,7 +32,7 @@ async def get_shipment(shipment_id: UUID, db: Session = Depends(get_db)) -> Ship
 
 @router.get("/{shipment_id}/status")
 @require_scopes(["Shipment.Read"])
-async def get_shipment_status(shipment_id: UUID, db: Session = Depends(get_db)):
+async def get_shipment_status(shipment_id: UUID, db: Session = Depends(get_db)) -> ShipmentStatus:
     """
     Get the shipment status for a specific shipment ID.
     Due to varying providers, this is a delegate request.
@@ -40,6 +40,5 @@ async def get_shipment_status(shipment_id: UUID, db: Session = Depends(get_db)):
     """
     shipment = await get_shipment(shipment_id, db)
     provider = shipping_providers[shipment.provider]
-
-    raise HTTPException(
-        status_code=500, detail="Could not get shipment status. Has this provider been implemented?")
+    status = await provider.get_shipment_status(shipment.provider_shipment_id)
+    return status

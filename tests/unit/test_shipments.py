@@ -8,6 +8,7 @@ from random import choice, randint
 import pytest
 from app.routers.deliveries import make_delivery_breakdown
 from app.routers.orders import create_order_delivery, create_order_return
+from app.routers.shipments import get_shipment
 from app.shipping.enums import SLA
 import tests.conftest
 

@@ -1,4 +1,6 @@
+from datetime import datetime, timedelta
 import os
+from random import choice
 from uuid import uuid4
 from dotenv import load_dotenv
 import pytest
@@ -6,8 +8,9 @@ from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import sessionmaker
 
 
-from app.database.schemas import Delivery, Warehouse, WarehouseItem, Base
+from app.database.schemas import Delivery, Shipment, ShipmentDeliveryInfo, ShipmentItem, ShipmentStatus, Warehouse, WarehouseItem, Base
 from app.database import engine, Session
+from app.shipping.enums import SLA, Provider, Status
 
 
 def pytest_configure(config):
@@ -43,6 +46,45 @@ for warehouse in test_warehouses:
             warehouse_id=warehouse.warehouse_id, upc=i, stock=10))
 
 
+mock_delivery_id = uuid4()
+mock_delivery_shipments = [
+    Shipment(
+        shipment_id=uuid4(),
+        shipping_address="2683 NC-24, Warsaw, NC 28398",
+        from_address=test_warehouses[0].address,
+        provider=choice(list(Provider)),
+        provider_shipment_id=str(uuid4()),
+        created_at=datetime.now(),
+        items=[
+            ShipmentItem(upc=1, stock=9),
+            ShipmentItem(upc=2, stock=12)
+        ],
+        status=ShipmentStatus(
+            message=Status.PENDING,
+            expected_at=datetime.now()+timedelta(days=3),
+            updated_at=datetime.now(),
+            delivered_at=None
+        )
+    )
+]
+mock_delivery = Delivery(
+    delivery_id=mock_delivery_id,
+    order_id=uuid4(),
+    created_at=datetime.now(),
+    fulfilled_at=None,
+    delivery_sla=choice(list(SLA)),
+    recipient_address="2683 NC-24, Warsaw, NC 28398",
+    delivery_shipments=[
+        ShipmentDeliveryInfo(
+            shipment_id=shipment.shipment_id,
+            shipment=shipment,
+            delivery_id=mock_delivery_id
+        ) for shipment in mock_delivery_shipments
+    ]
+
+)
+
+
 @pytest.fixture(scope="session")
 def db():
     """
@@ -61,9 +103,20 @@ def setup_db(db: Engine):
     session = session_factory()
     session.add_all(test_warehouses)
     session.add_all(test_items)
+    session.add(mock_delivery)
     session.commit()
     session.close()
     yield
+
+
+@pytest.fixture(scope="session")
+def delivery_id():
+    return mock_delivery_id
+
+
+@pytest.fixture(scope="session")
+def shipment_id():
+    return mock_delivery_shipments[0].shipment_id
 
 
 @pytest.fixture(scope="function")
