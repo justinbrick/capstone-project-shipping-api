@@ -103,12 +103,18 @@ class Return(BaseModel):
     """The ID of the return."""
     shipment: Shipment
     """The shipment that contains the items to be returned."""
+    created_at: datetime
+    """The time that this return was created."""
+    items: list[ShipmentItem]
+    """The items that are going to be returned."""
 
 
 class DeliveryTimeResponse(BaseModel):
     """
     Represents the response with delivery time, items, stock, and the provider.
     """
+    warehouse_id: UUID
+    """The ID of the warehouse that the delivery is coming from."""
     from_address: str
     """The address of the warehouse that the delivery is coming from."""
     delivery_time: datetime

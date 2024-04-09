@@ -23,7 +23,7 @@ class OutOfStockException(Exception):
     pass
 
 
-async def get_warehouses():
+async def get_warehouses() -> list[Warehouse]:
     """
     Get all warehouses.
     TODO: Get warehouse information from the warehouse API.
@@ -43,6 +43,25 @@ async def get_warehouse(warehouse_id: UUID) -> Warehouse:
         return warehouse
 
     response = await client.get(f"/warehouses/{warehouse_id}")
+    response.raise_for_status()
+    return response.json()
+
+
+async def get_warehouse_by_address(address: str) -> Warehouse:
+    """
+    Get a warehouse by its address.
+
+    :param address: the address of the warehouse
+    """
+    """TEST IMPL, VOLATILE!"""
+    with Session() as db:
+        warehouse = db.query(Warehouse).filter(
+            Warehouse.address == address).first()
+        if warehouse is None:
+            raise Exception("Warehouse not found.")
+        return warehouse
+
+    response = await client.get(f"/warehouses/address/{address}")
     response.raise_for_status()
     return response.json()
 
@@ -108,7 +127,7 @@ async def get_nearest_warehouses(location: str) -> list[Warehouse]:
 async def get_warehouse_chunks(address: str, items: list[ShipmentItem]) -> list[WarehouseStockAvailability]:
     """
     Get a delivery breakdown given a specific SLA and items.
-    If the order cannot be fulfilled, raise a ValueError.
+    If the order cannot be fulfilled, raise an OutOfStockException.
 
     :param address: the address to deliver to
     :param items: the items to deliver
@@ -130,3 +149,47 @@ async def get_warehouse_chunks(address: str, items: list[ShipmentItem]) -> list[
         raise OutOfStockException("Not enough stock to fulfill the order.")
 
     return warehouse_chunks
+
+
+async def remove_warehouse_stock(warehouse_id: UUID, items: list[ShipmentItem]):
+    """
+    Remove stock from a warehouse.
+    """
+    """TEST IMPL, VOLATILE!"""
+    with Session() as db:
+        for item in items:
+            db_item = db.query(schemas.WarehouseItem)\
+                .filter(schemas.WarehouseItem.warehouse_id == warehouse_id)\
+                .filter(schemas.WarehouseItem.upc == item.upc)\
+                .first()
+
+            db_item.stock -= item.stock
+
+        db.flush()
+        db.commit()
+
+    # response = await client.post(f"/warehouses/{warehouse_id}/stock/remove", json={"items": items})
+    # response.raise_for_status()
+    # return response.json()
+
+
+async def add_warehouse_stock(warehouse_id: UUID, items: list[ShipmentItem]):
+    """
+    Add stock to a warehouse.
+    """
+    """TEST IMPL, VOLATILE!"""
+    with Session() as db:
+        for item in items:
+            db_item = db.query(schemas.WarehouseItem)\
+                .filter(schemas.WarehouseItem.warehouse_id == warehouse_id)\
+                .filter(schemas.WarehouseItem.upc == item.upc)\
+                .first()
+
+            db_item.stock += item.stock
+
+        db.flush()
+        db.commit()
+
+    # response = await client.post(f"/warehouses/{warehouse_id}/stock/add", json={"items": items})
+    # response.raise_for_status()
+    # return response.json()
