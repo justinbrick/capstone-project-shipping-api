@@ -6,12 +6,34 @@ from uuid import uuid4
 from random import choice, randint
 
 import pytest
+from app.routers.deliveries import make_delivery_breakdown
 from app.routers.orders import create_order_delivery, create_order_return
 from app.shipping.enums import SLA
 import tests.conftest
 
 from app.inventory.warehouse import get_nearest_warehouses
 from app.shipping.models import CreateDeliveryRequest, CreateReturnRequest, CreateShipmentRequest, Provider, ShipmentItem
+
+
+@pytest.mark.asyncio
+async def test_create_delivery_breakdown(session):
+    """
+    Tests the creation of a delivery breakdown.
+    """
+    request = CreateDeliveryRequest(
+        delivery_sla=SLA.STANDARD,
+        items=[
+            ShipmentItem(upc=1, stock=9),
+            ShipmentItem(upc=2, stock=12)
+        ],
+        recipient_address="2683 NC-24, Warsaw, NC 28398"
+    )
+
+    delivery_breakdown = await make_delivery_breakdown(request)
+    assert delivery_breakdown.recipient_address == request.recipient_address
+    assert delivery_breakdown.expected_at is not None
+    assert delivery_breakdown.can_meet_sla is True
+    assert len(delivery_breakdown.delivery_times) == 2
 
 
 @pytest.mark.asyncio
