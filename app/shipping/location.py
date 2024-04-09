@@ -14,13 +14,16 @@ This is because the coordinates will be queried in a quick burst.
 For debug purposes, the cache size is unlimited, as it will return random values.
 """
 warehouse_api_key = environ.get("MAPS_API_KEY")
-cache_size = 128
-if __debug__:
-    cache_size = None
+
+if warehouse_api_key is None:
     warnings.warn(
         "Could not find Google Maps API key. Geocoding will be done through Photon.")
     print("WARNING: Photon geocoding is prone to errors & rate limiting.")
     print("WARNING: To disable debug mode, run the application with the -O flag.")
+
+cache_size = 128
+if __debug__:
+    cache_size = None
 
 
 @alru_cache(maxsize=cache_size)
