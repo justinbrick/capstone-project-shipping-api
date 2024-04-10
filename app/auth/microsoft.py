@@ -23,6 +23,8 @@ async def get_json_keys() -> list[dict]:
     This is used for user logins.
     """
 
+    global _last_checked, _cached_keys
+
     if _last_checked + timedelta(minutes=5) > datetime.now():
         return _cached_keys
 
