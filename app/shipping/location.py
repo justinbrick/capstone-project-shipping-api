@@ -1,6 +1,10 @@
 """
 Locational functions and services for shipping.
 """
+
+__author__ = "Justin B. (justin@justin.directory)"
+
+
 import warnings
 from async_lru import alru_cache
 from geopy.adapters import AioHTTPAdapter

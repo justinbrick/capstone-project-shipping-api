@@ -2,6 +2,9 @@
 Business logic regarding the delivery of shipments.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
+
 from datetime import datetime, timedelta
 from random import choice
 from uuid import UUID

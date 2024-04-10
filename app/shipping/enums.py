@@ -2,6 +2,9 @@
 Enums for shipping module
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
+
 from enum import Enum
 
 

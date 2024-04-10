@@ -2,6 +2,9 @@
 This module contains the internal implementation of a shipment provider.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
+
 from uuid import UUID
 from app.shipping.enums import Provider
 from app.shipping.providers import ShipmentProvider
@@ -19,17 +22,11 @@ class InternalShipmentProvider(ShipmentProvider):
         self.speed_mult = 0.5
         pass
 
-    async def create_shipment(self, request: CreateShipmentRequest) -> Shipment:
-        return await super().create_shipment(request)
-
     async def get_shipment_status(self, tracking_identifier: str) -> ShipmentStatus:
         return await super().get_shipment_status(tracking_identifier)
 
     def create_random_id(self, associated: UUID) -> str:
         return str(associated)
-
-    async def get_shipment_location(self, tracking_identifier: str) -> str | None:
-        return f"Package {tracking_identifier} is in North Carolina."
 
 
 client = InternalShipmentProvider()

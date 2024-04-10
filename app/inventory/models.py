@@ -2,6 +2,9 @@
 All the models related to inventory management.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
+
 from uuid import UUID
 from pydantic import BaseModel
 

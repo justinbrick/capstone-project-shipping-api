@@ -2,6 +2,8 @@
 Warehouse related requests.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
 from uuid import UUID
 
 from app import get_db

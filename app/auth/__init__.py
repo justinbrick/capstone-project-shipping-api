@@ -2,6 +2,8 @@
 The module which contains helper functions for authentication and authorization.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
 from os import environ
 from msal import ConfidentialClientApplication
 

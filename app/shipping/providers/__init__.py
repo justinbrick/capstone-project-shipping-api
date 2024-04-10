@@ -2,6 +2,7 @@
 A module containing all of the different providers and their client implementations.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
 
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta

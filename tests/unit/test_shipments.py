@@ -2,18 +2,38 @@
 Unit tests for the shipments module.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
 from uuid import uuid4
 from random import choice, randint
 
 import pytest
 from app.routers.deliveries import make_delivery_breakdown
 from app.routers.orders import create_order_delivery, create_order_return
-from app.routers.shipments import get_shipment
+from app.routers.shipments import get_shipment, get_shipments
 from app.shipping.enums import SLA
-import tests.conftest
 
 from app.inventory.warehouse import get_nearest_warehouses
 from app.shipping.models import CreateDeliveryRequest, CreateReturnRequest, CreateShipmentRequest, Provider, ShipmentItem
+
+
+@pytest.mark.asyncio
+async def test_get_shipment(session, shipment_id):
+    """
+    Tests the retrieval of a shipment.
+    """
+    shipment = await get_shipment(shipment_id, session)
+    assert shipment is not None
+    assert shipment.shipment_id == shipment_id
+
+
+@pytest.mark.asyncio
+async def test_get_shipments(session, account):
+    """
+    Tests the retrieval of all shipments.
+    """
+    shipments = await get_shipments(session, account)
+    assert len(shipments) == 2
 
 
 @pytest.mark.asyncio

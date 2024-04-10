@@ -1,3 +1,10 @@
+"""
+The main module, containing the FastAPI application.
+"""
+
+__author__ = "Justin B. (justin@justin.directory)"
+
+
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
@@ -11,18 +18,19 @@ from .database.schemas import Base
 Base.metadata.create_all(bind=engine)
 
 
-
 app = FastAPI()
 
 # Middleware
 anonymous_endpoints = ["/docs", "/openapi.json", "/about"]
-app.add_middleware(EntraOAuth2Middleware, client_id=CLIENT_ID, tenant_id=TENANT_ID, anonymous_endpoints=anonymous_endpoints)
+app.add_middleware(EntraOAuth2Middleware, client_id=CLIENT_ID,
+                   tenant_id=TENANT_ID, anonymous_endpoints=anonymous_endpoints)
 
 # Routers
 app.include_router(shipments.router, prefix="/shipments", tags=["shipments"])
 app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(returns.router, prefix="/returns", tags=["returns"])
 app.include_router(orders.router, prefix="/orders", tags=["orders"])
+
 
 @app.get("/about", response_class=HTMLResponse)
 async def about() -> str:

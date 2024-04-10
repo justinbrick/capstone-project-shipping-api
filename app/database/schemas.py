@@ -4,6 +4,8 @@ This base class is used to create the tables and metadata for the database.
 All models must inherit from this base class, or it won't be created.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
 from typing import Optional
 from uuid import UUID
 from datetime import datetime
@@ -20,6 +22,20 @@ class Base(DeclarativeBase):
     """
     A base class used to create the tables and metadata for the database.
     """
+
+
+class Order(Base):
+    """
+    Represents an order that has been placed.
+    """
+    __tablename__ = "orders"
+    order_id: Mapped[UUID] = mapped_column(primary_key=True)
+    """The ID of the order."""
+    customer_id: Mapped[UUID]
+    """The ID of the customer that placed the order."""
+    created_at: Mapped[datetime]
+    """The date and time that the order was created."""
+    deliveries: Mapped[list["Delivery"]] = relationship()
 
 
 class Shipment(Base):
@@ -60,7 +76,7 @@ class Delivery(Base):
     __tablename__ = "deliveries"
     delivery_id: Mapped[UUID] = mapped_column(primary_key=True)
     """The ID of the delivery."""
-    order_id: Mapped[UUID]
+    order_id: Mapped[UUID] = mapped_column(ForeignKey("orders.order_id"))
     """The ID of the order that is associated with the delivery."""
     recipient_address: Mapped[str] = mapped_column(VARCHAR(255))
     """The address that the delivery is going to."""

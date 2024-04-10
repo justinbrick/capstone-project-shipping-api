@@ -2,6 +2,8 @@
 A router for creating and managing deliveries.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
 from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session

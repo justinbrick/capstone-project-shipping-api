@@ -1,3 +1,9 @@
+"""
+Configuration details for the database.
+"""
+
+__author__ = "Justin B. (justin@justin.directory)"
+
 from os import environ
 from sys import modules
 import warnings

@@ -2,6 +2,8 @@
 All the routes to get shipping information related to billing orders.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
 from datetime import datetime
 from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException

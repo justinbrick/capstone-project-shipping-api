@@ -2,6 +2,9 @@
 Models for the shipping API.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
+
 from typing import Optional
 from .enums import Provider, Status, SLA
 

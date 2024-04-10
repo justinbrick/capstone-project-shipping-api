@@ -2,6 +2,9 @@
 Business functions for creating low level shipments.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
+
 from app.shipping.delivery import shipping_providers
 from app.shipping.models import CreateShipmentRequest, Shipment
 

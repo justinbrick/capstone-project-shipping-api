@@ -2,6 +2,8 @@
 Mock FedEx tracking API
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
 from datetime import datetime, timedelta
 import random
 from typing import Any, Coroutine
@@ -33,17 +35,15 @@ class FedexShipmentProvider(ShipmentProvider):
         self.speed_mult = 1.5
 
     def create_random_id(self, associated: UUID) -> str:
-        # TODO: Needs true fedex tracking number
-        random_id = ''.join(random.choices('0123456789ABCDEF', k=6))
-        random_digits = ''.join(random.choices('0123456789', k=8))
-        # 3E for economy
-        return f"1Z{random_id}3E{random_digits}"
+        random_numbers = [
+            ''.join(random.choices('0123456789', k=4))
+            for _ in range(3)
+        ]
+        tracking_number = ' '.join(random_numbers)
+        return tracking_number
 
     async def get_shipment_status(self, tracking_identifier: str) -> ShipmentStatus:
         return await super().get_shipment_status(tracking_identifier)
-
-    async def get_shipment_location(self, tracking_identifier: str) -> str | None:
-        return f"Package {tracking_identifier} is in North Carolina."
 
 
 client = FedexShipmentProvider()

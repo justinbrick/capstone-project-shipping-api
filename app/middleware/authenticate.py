@@ -3,6 +3,8 @@
 Authentication & Authorization Middleware
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
 from typing import Optional
 from fastapi import Depends, Request, HTTPException
 from starlette.types import ASGIApp, Scope, Receive, Send
@@ -16,6 +18,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 from app.auth.microsoft import get_json_keys
 from app.auth import TENANT_SHORT_NAME
+from app.auth.profile import AccountProfile
 
 ISSUER_URL = f"https://{TENANT_SHORT_NAME}.b2clogin.com/{TENANT_SHORT_NAME}.onmicrosoft.com/v2.0"
 
@@ -231,7 +234,8 @@ class EntraOAuth2Middleware:
             payload = jwt.decode(token, reformed_key, algorithms=[
                                  "RS256"], audience=self.client_id, issuer=ISSUER_URL, options=options)
             # Hooray, they've passed verification!
-            scope["jwt"] = payload
+            profile = AccountProfile(payload)
+            scope["b2c_profile"] = profile
             await self.app(scope, receive, send)
         except jwt.DecodeError:
             response = PlainTextResponse("Invalid token.", status_code=401)
