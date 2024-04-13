@@ -96,4 +96,6 @@ class ShipmentProvider(ABC):
         # Default of 12 hours per 100 miles
         # Times by the speed multiplier
         time_hours = (dist / 100 * 12) * self.speed_mult
+        # Default of price of 10 dollars for shipping
+
         return timedelta(hours=time_hours)

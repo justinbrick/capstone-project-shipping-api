@@ -22,6 +22,10 @@ TODO: Implement the following functions to complete the FedEx mock API.
 
 3. Implement get_status and get_location functions to return the status and location of a package with a given tracking number
 
+4. Speed multiplier/cost multiplier for shipment price estimates.
+
+5. Implement users.py router to query user information whether previous or current(sort by date descending) shipments have been delivered or are in transit.
+
 """
 
 
