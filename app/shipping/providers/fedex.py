@@ -4,27 +4,25 @@ Mock FedEx tracking API
 
 __author__ = "Justin B. (justin@justin.directory)"
 
-from datetime import datetime, timedelta
 import random
-from typing import Any, Coroutine
 from uuid import UUID
 
 from app.shipping.enums import Provider
 from . import ShipmentProvider
-from ..models import CreateShipmentRequest, Shipment, ShipmentStatus
+from ..models import ShipmentStatus
 
 """
 TODO: Implement the following functions to complete the FedEx mock API.
 
-1. Mock Database to hold mock tracking numbers and hard coded statuses
+1. Mock Database to hold mock tracking numbers and hard coded statuses(FINISHED)
 
-2. Add a tracking number to the database when a tracking number is generated
+2. Add a tracking number to the database when a tracking number is generated(FINISHED)
 
-3. Implement get_status and get_location functions to return the status and location of a package with a given tracking number
+3. Implement get_status and get_location functions to return the status and location of a package with a given tracking number(FINISHED)
 
-4. Speed multiplier/cost multiplier for shipment price estimates.
+4. Speed multiplier/cost multiplier for shipment price estimates.(FINISHED)
 
-5. Implement users.py router to query user information whether previous or current(sort by date descending) shipments have been delivered or are in transit.
+5. Implement users.py router to query user information whether previous or current(sort by date descending) shipments have been delivered or are in transit.(FINISHED)
 
 """
 

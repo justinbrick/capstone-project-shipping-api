@@ -98,6 +98,23 @@ class ShipmentProvider(ABC):
         # Default of 12 hours per 100 miles
         # Times by the speed multiplier
         time_hours = (dist / 100 * 12) * self.speed_mult
-        # Default of price of 10 dollars for shipping
 
         return timedelta(hours=time_hours)
+
+    async def get_shipment_price(self, to_address: str, from_address: str) -> float:
+        """
+        Get the price of shipping from one address to another.
+
+        :param to_address: the address to ship to
+        :param from_address: the address to ship from
+        :return: the price of shipping
+        """
+
+        to_coords = await get_address_coordinates(to_address)
+        from_coords = await get_address_coordinates(from_address)
+        dist = geodesic(to_coords, from_coords).miles
+        # Default of $5 per 100 miles
+        # Times by the price multiplier
+        price = (dist / 100 * 5) * self.price_mult
+
+        return price
