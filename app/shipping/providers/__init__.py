@@ -23,6 +23,8 @@ class ShipmentProvider(ABC):
     """The type of provider that this client is for."""
     speed_mult: float
     """The speed multiplier for the provider - used to approximate delivery times."""
+    price_mult: float
+    """The price multiplier for the provider - used to approximate shipping costs."""
 
     @abstractmethod
     async def get_shipment_status(self, tracking_identifier: str) -> ShipmentStatus:

@@ -21,6 +21,7 @@ class UPSShipmentProvider(ShipmentProvider):
     def __init__(self) -> None:
         self.provider_type = Provider.UPS
         self.speed_mult = 2.0
+        self.price_mult = 1.5
         pass
 
     async def get_shipment_status(self, tracking_identifier: str) -> ShipmentStatus:

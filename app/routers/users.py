@@ -15,7 +15,6 @@ from app.shipping.models import Shipment, ShipmentStatus
 from app.shipping.delivery import shipping_providers as shipping_providers
 from app.database import schemas
 
-
 router = APIRouter()
 
 

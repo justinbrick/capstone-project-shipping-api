@@ -20,6 +20,7 @@ class InternalShipmentProvider(ShipmentProvider):
     def __init__(self) -> None:
         self.provider_type = Provider.INTERNAL
         self.speed_mult = 0.5
+        self.price_mult = 0.8
         pass
 
     async def get_shipment_status(self, tracking_identifier: str) -> ShipmentStatus:
