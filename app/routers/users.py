@@ -5,7 +5,7 @@ A router to get user related shipping information.
 from fastapi import APIRouter
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app import get_db
@@ -18,27 +18,29 @@ from app.database import schemas
 router = APIRouter()
 
 
-@router.get("/users/{user_id}/shipments", tags=["users"])
-def get_user_shipments(user_id: int):
+@router.get("/shipments")
+async def get_user_shipments(profile: AccountProfile = Depends(get_profile), db: Session = Depends(get_db)) -> list[Shipment]:
     """
-    Logic to query user shipments from the database
-    Return the queried shipments as a response
+    Get all the shipments for a given user.
     """
 
-    return {"user_id": user_id, "shipments": []}
+    shipments = db.query(schemas.Shipment).where(
+        schemas.Shipment.user_id == profile.user_id).all()
+
+    return shipments
 
 
 def sort_all_shipments(shipments):
     """
-    Sort the shipments by the created_at field in descending order
+    Sort the shipments by created_at field in descending order
     """
 
-    return sorted(shipments, key=lambda x: x["created_at"], reverse=True)
+    return sorted(shipments, key=lambda shipment: shipment["created_at"], reverse=True)
 
 
-def sort_undelivered_shipments(shipments):
+def sort_out_undelivered_shipments(shipments):
     """
-    Filter out the shipments that have been delivered and sort the remaining shipments by created_at field in descending order
+    Sort out the shipments that are not delivered yet
     """
 
-    return sort_all_shipments([shipment for shipment in shipments if shipment["status"] != "delivered"])
+    return [shipment for shipment in shipments if shipment["status"] != ShipmentStatus.DELIVERED]
