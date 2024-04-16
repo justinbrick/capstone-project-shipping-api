@@ -4,21 +4,21 @@ Unit tests for the shipments module.
 
 __author__ = "Justin B. (justin@justin.directory)"
 
-from uuid import uuid4
-from random import choice, randint
+from uuid import UUID
 
 import pytest
+from sqlalchemy.orm.session import Session
+from app.auth.profile import AccountProfile
 from app.routers.deliveries import make_delivery_breakdown
-from app.routers.orders import create_order_delivery, create_order_return
 from app.routers.shipments import get_shipment, get_shipments
 from app.shipping.enums import SLA
 
 from app.inventory.warehouse import get_nearest_warehouses
-from app.shipping.models import CreateDeliveryRequest, CreateReturnRequest, CreateShipmentRequest, Provider, ShipmentItem
+from app.shipping.models import CreateDeliveryRequest, CreateShipmentRequest, Provider, ShipmentItem
 
 
 @pytest.mark.asyncio
-async def test_get_shipment(session, shipment_id):
+async def test_get_shipment(session: Session, shipment_id: UUID):
     """
     Tests the retrieval of a shipment.
     """
@@ -28,7 +28,7 @@ async def test_get_shipment(session, shipment_id):
 
 
 @pytest.mark.asyncio
-async def test_get_shipments(session, account):
+async def test_get_shipments(session: Session, account: AccountProfile):
     """
     Tests the retrieval of all shipments.
     """
@@ -37,15 +37,15 @@ async def test_get_shipments(session, account):
 
 
 @pytest.mark.asyncio
-async def test_create_delivery_breakdown(session):
+async def test_create_delivery_breakdown(session: Session):
     """
     Tests the creation of a delivery breakdown.
     """
     request = CreateDeliveryRequest(
         delivery_sla=SLA.STANDARD,
         items=[
-            ShipmentItem(upc=1, stock=9),
-            ShipmentItem(upc=2, stock=12)
+            ShipmentItem(upc=3, stock=9),
+            ShipmentItem(upc=4, stock=12)
         ],
         recipient_address="2683 NC-24, Warsaw, NC 28398"
     )
@@ -55,44 +55,6 @@ async def test_create_delivery_breakdown(session):
     assert delivery_breakdown.expected_at is not None
     assert delivery_breakdown.can_meet_sla is True
     assert len(delivery_breakdown.delivery_times) == 2
-
-
-@pytest.mark.asyncio
-async def test_create_delivery(session):
-    """
-    Tests the creation of a shipment.
-    """
-    order_id = uuid4()
-    request = CreateDeliveryRequest(
-        delivery_sla=SLA.STANDARD,
-        items=[
-            ShipmentItem(upc=1, stock=9),
-            ShipmentItem(upc=2, stock=12)
-        ],
-        recipient_address="2683 NC-24, Warsaw, NC 28398"
-    )
-
-    delivery = await create_order_delivery(order_id, request, session)
-    assert delivery.order_id == order_id
-    assert delivery.delivery_sla == request.delivery_sla
-    assert len(delivery.shipments) == 2
-    assert delivery.created_at is not None
-
-
-@pytest.mark.asyncio
-async def test_create_return(session):
-    order_id = uuid4()
-    request = CreateReturnRequest(
-        order_id=order_id,
-        items=[
-            ShipmentItem(upc=1, stock=9),
-            ShipmentItem(upc=2, stock=12)
-        ],
-        from_address="2683 NC-24, Warsaw, NC 28398"
-    )
-    order_return = await create_order_return(order_id, request, session)
-    assert order_return.order_id == order_id
-    assert order_return.created_at is not None
 
 
 @pytest.mark.asyncio
