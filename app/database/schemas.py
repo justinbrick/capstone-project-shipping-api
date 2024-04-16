@@ -62,8 +62,6 @@ class ShipmentDeliveryInfo(Base):
     shipment_id: Mapped[UUID] = mapped_column(
         ForeignKey("shipments.shipment_id"), primary_key=True)
     """A shipment ID that is associated with the delivery."""
-    shipment: Mapped[Shipment] = relationship()
-    """The shipment that is associated with the delivery."""
     delivery_id: Mapped[UUID] = mapped_column(
         ForeignKey("deliveries.delivery_id"), primary_key=True)
     """A delivery ID that is associated with the shipment."""
@@ -86,7 +84,9 @@ class Delivery(Base):
     """The date and time that the delivery was fulfilled."""
     delivery_sla: Mapped[SLA]
     """The service level agreement that the delivery is under."""
-    delivery_shipments: Mapped[list["ShipmentDeliveryInfo"]] = relationship()
+    shipments: Mapped[list[Shipment]] = relationship(
+        secondary="shipment_delivery_info"
+    )
     """The shipments that are associated with the delivery."""
 
 

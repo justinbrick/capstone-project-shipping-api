@@ -68,8 +68,6 @@ class Shipment(BaseModel):
     """The time that this shipment was created."""
     items: list[ShipmentItem]
     """The items that are going to be shipped."""
-    status: ShipmentStatus
-    """The status of the shipment."""
 
     model_config = {
         # This is a flag to indicate that the model should be created from the attributes.
@@ -93,6 +91,12 @@ class Delivery(BaseModel):
     """The time that this delivery was created."""
     delivery_sla: SLA
     """The SLA that this delivery must adhere to."""
+
+    model_config = {
+        # This is a flag to indicate that the model should be created from the attributes.
+        # Used to work with ORM models.
+        "from_attributes": True
+    }
 
 
 class Return(BaseModel):
