@@ -11,12 +11,12 @@ from uuid import UUID, uuid4
 from dotenv import load_dotenv
 import pytest
 from sqlalchemy import Engine, create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
 
 from app.auth.profile import AccountProfile
 from app.database.schemas import Delivery, Order, Shipment, ShipmentDeliveryInfo, ShipmentItem, ShipmentStatus, Warehouse, WarehouseItem, Base
-from app.database import engine, Session
+from app.database import engine
 from app.shipping.enums import SLA, Provider, Status
 
 
@@ -120,13 +120,7 @@ mock_delivery = Delivery(
     fulfilled_at=None,
     delivery_sla=choice(list(SLA)),
     recipient_address="2683 NC-24, Warsaw, NC 28398",
-    delivery_shipments=[
-        ShipmentDeliveryInfo(
-            shipment_id=shipment.shipment_id,
-            shipment=shipment,
-            delivery_id=mock_delivery_id
-        ) for shipment in mock_delivery_shipments
-    ]
+    shipments=mock_delivery_shipments
 )
 
 
@@ -172,7 +166,7 @@ def session(db):
 
 
 @pytest.fixture(scope="function")
-def shipment_id(session):
+def shipment_id(session: Session) -> UUID:
     """
     Returns an example shipment ID.
 
