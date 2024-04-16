@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from app.inventory.warehouse import add_warehouse_stock, remove_warehouse_stock
 from app.routers.deliveries import get_delivery_shipments, make_delivery_breakdown
 from app.shipping.delivery import get_delivery_breakdown
-from app.shipping.enums import Provider
+from app.shipping.enums import Provider, Status
 from app.shipping.shipment import create_shipment
 
 from ..database import schemas
@@ -70,7 +70,7 @@ async def create_order_delivery(order_id: UUID, request: CreateDeliveryRequest, 
 
     delivery_id = uuid4()
     shipments: list[Shipment] = []
-    delivery_infos: list[schemas.ShipmentDeliveryInfo] = []
+    db_shipments: list[schemas.Shipment] = []
     successful_item_removals: list[DeliveryTimeResponse] = []
     try:
         for delivery_time in delivery_breakdown.delivery_times:
@@ -92,31 +92,24 @@ async def create_order_delivery(order_id: UUID, request: CreateDeliveryRequest, 
             shipment = await create_shipment(shipment_request)
             shipments.append(shipment)
 
-            # Create status and items for the shipment.
-            db_shipment_items = [
-                schemas.ShipmentItem(
-                    shipment_id=shipment.shipment_id,
-                    upc=item.upc,
-                    stock=item.stock
-                )
-                for item in shipment.items]
-
             # Create the shipment model and add it to the list of delivery infos.
             db_shipment = schemas.Shipment(
-                **shipment.model_dump(exclude=["items", "status"]),
+                **shipment.model_dump(exclude=["items"]),
                 status=schemas.ShipmentStatus(
-                    **shipment.status.model_dump()
+                    message=Status.PENDING,
+                    expected_at=delivery_time.delivery_time,
+                    updated_at=datetime.now(),
+                    delivered_at=None
                 ),
-                items=db_shipment_items
+                items=[
+                    schemas.ShipmentItem(
+                        **item.model_dump()
+                    )
+                    for item in shipment.items
+                ]
             )
 
-            delivery_infos.append(
-                schemas.ShipmentDeliveryInfo(
-                    shipment_id=shipment.shipment_id,
-                    shipment=db_shipment,
-                    delivery_id=delivery_id
-                )
-            )
+            db_shipments.append(db_shipment)
 
         dump = request.model_dump(exclude=["items"])
         created_at = datetime.now()
@@ -125,7 +118,7 @@ async def create_order_delivery(order_id: UUID, request: CreateDeliveryRequest, 
             order_id=order_id,
             created_at=created_at,
             **dump,
-            delivery_shipments=delivery_infos
+            shipments=db_shipments
         )
 
         db.add(db_delivery)
@@ -179,31 +172,17 @@ async def create_order_return(order_id: UUID, return_request: CreateReturnReques
 
     shipment = await internal_shipping.create_shipment(shipment_request)
 
-    db_shipment_items = [
-        schemas.ShipmentItem(
-            shipment_id=shipment.shipment_id,
-            upc=item.upc,
-            stock=item.stock)
-        for item in shipment.items]
-
-    db_shipment = schemas.Shipment(
-        shipment_id=shipment.shipment_id,
-        provider_shipment_id=shipment.provider_shipment_id,
-        from_address=shipment.from_address,
-        shipping_address=shipment.shipping_address,
-        provider=shipment.provider,
-        created_at=shipment.created_at,
-        items=db_shipment_items,
-    )
-
-    db.add(db_shipment)
-    db.commit()
-
     db_return = schemas.Return(
+        created_at=datetime.now(),
         order_id=order_id,
         return_id=return_id,
-        shipment_id=shipment.shipment_id,
-        created_at=datetime.now()
+        shipment=schemas.Shipment(
+            **shipment.model_dump(exclude=["items"]),
+            items=[
+                schemas.ShipmentItem(**item.model_dump())
+                for item in shipment.items
+            ]
+        )
     )
 
     db.add(db_return)

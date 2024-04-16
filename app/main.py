@@ -5,10 +5,12 @@ The main module, containing the FastAPI application.
 __author__ = "Justin B. (justin@justin.directory)"
 
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.responses import HTMLResponse
 
-from .auth import CLIENT_ID, TENANT_ID
+from app.auth import CLIENT_ID, TENANT_ID
+from app.auth.dependencies import has_roles
+
 from .routers import shipments, users, returns, orders
 from .middleware.authenticate import EntraOAuth2Middleware
 from .database import engine
@@ -26,7 +28,14 @@ app.add_middleware(EntraOAuth2Middleware, client_id=CLIENT_ID,
                    tenant_id=TENANT_ID, anonymous_endpoints=anonymous_endpoints)
 
 # Routers
-app.include_router(shipments.router, prefix="/shipments", tags=["shipments"])
+app.include_router(
+    shipments.router,
+    prefix="/shipments",
+    tags=["shipments"],
+    dependencies=[
+        Depends(has_roles(["admin"]))
+    ]
+)
 app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(returns.router, prefix="/returns", tags=["returns"])
 app.include_router(orders.router, prefix="/orders", tags=["orders"])

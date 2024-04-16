@@ -54,9 +54,8 @@ async def get_shipments(db: Session = Depends(get_db), profile: AccountProfile =
 @router.get("/{shipment_id}/status")
 async def get_shipment_status(shipment_id: UUID, db: Session = Depends(get_db)) -> ShipmentStatus:
     """
-    Get the shipment status for a specific shipment ID.
-    Due to varying providers, this is a delegate request.
-    As a result, it is volatile depending on the provider.
+    Get the current status of a shipment.
+    Queries third parties - expect failures.
     """
 
     shipment = await get_shipment(shipment_id, db)
