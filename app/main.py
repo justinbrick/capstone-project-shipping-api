@@ -11,7 +11,7 @@ from fastapi.responses import HTMLResponse
 from app.auth import CLIENT_ID, TENANT_ID
 from app.auth.dependencies import has_roles
 
-from .routers import shipments, users, returns, orders
+from .routers import shipments, users, returns, orders, me
 from .middleware.authenticate import EntraOAuth2Middleware
 from .database import engine
 from .database.schemas import Base
@@ -36,6 +36,7 @@ app.include_router(
         Depends(has_roles(["admin"]))
     ]
 )
+app.include_router(me.router, prefix="/me", tags=["me"])
 app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(returns.router, prefix="/returns", tags=["returns"])
 app.include_router(orders.router, prefix="/orders", tags=["orders"])

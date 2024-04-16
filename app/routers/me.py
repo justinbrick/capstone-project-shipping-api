@@ -12,7 +12,7 @@ from app import get_db
 from app.auth.dependencies import get_profile
 from app.auth.profile import AccountProfile
 from app.database import schemas
-from app.shipping.models import Delivery, Shipment
+from app.shipping.models import Delivery, Shipment, ShipmentStatus
 from app.shipping.delivery import shipping_providers
 
 router = APIRouter()
@@ -35,7 +35,7 @@ async def get_my_shipments(db: Session = Depends(get_db), profile: AccountProfil
 
 
 @router.get("/shipments/{shipment_id}/status")
-async def get_my_shipment_status(shipment_id: UUID, db: Session = Depends(get_db), profile: AccountProfile = Depends(get_profile)):
+async def get_my_shipment_status(shipment_id: UUID, db: Session = Depends(get_db), profile: AccountProfile = Depends(get_profile)) -> ShipmentStatus:
     """
     Get the status of a shipment for the currently logged in user.
     """

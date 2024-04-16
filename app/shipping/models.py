@@ -10,7 +10,7 @@ from .enums import Provider, Status, SLA
 
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ShipmentItem(BaseModel):
@@ -39,7 +39,7 @@ class ShipmentStatus(BaseModel):
     """The time that this shipment is expected to be delivered."""
     updated_at: datetime
     """The time that this status was last updated. If more than 30 minutes have passed, the status will get updated."""
-    delivered_at: Optional[datetime] = None
+    delivered_at: datetime = Field(None, nullable=True)
     """The time that this shipment was delivered."""
     message: Status
     """The status of the shipment."""
