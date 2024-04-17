@@ -35,7 +35,7 @@ class FedexShipmentProvider(ShipmentProvider):
     def __init__(self) -> None:
         self.provider_type = Provider.FEDEX
         self.speed_mult = 1.5
-        self.price_mult = 1.2
+        self.price_mult = 1.25
 
     def create_random_id(self, associated: UUID) -> str:
         random_numbers = [
