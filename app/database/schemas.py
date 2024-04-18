@@ -7,10 +7,11 @@ All models must inherit from this base class, or it won't be created.
 __author__ = "Justin B. (justin@justin.directory)"
 
 from typing import Optional
-from uuid import UUID
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, VARCHAR
+from uuid import UUID
+
+from sqlalchemy import ForeignKey, VARCHAR, UUID as NativeUUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from app.shipping.enums import SLA
@@ -44,7 +45,7 @@ class Shipment(Base):
     Multiple shipments can be created for one order.
     """
     __tablename__ = "shipments"
-    shipment_id: Mapped[UUID] = mapped_column(primary_key=True)
+    shipment_id: Mapped[UUID] = mapped_column(NativeUUID, primary_key=True)
     from_address: Mapped[str] = mapped_column(VARCHAR(255))
     shipping_address: Mapped[str] = mapped_column(VARCHAR(255))
     provider: Mapped[Provider]
@@ -72,7 +73,7 @@ class Delivery(Base):
     Represents a full delivery, composed of the individual orders.
     """
     __tablename__ = "deliveries"
-    delivery_id: Mapped[UUID] = mapped_column(primary_key=True)
+    delivery_id: Mapped[UUID] = mapped_column(NativeUUID, primary_key=True)
     """The ID of the delivery."""
     order_id: Mapped[UUID] = mapped_column(ForeignKey("orders.order_id"))
     """The ID of the order that is associated with the delivery."""
@@ -106,7 +107,7 @@ class Return(Base):
     Represents a return for a given order.
     """
     __tablename__ = "returns"
-    return_id: Mapped[UUID] = mapped_column(primary_key=True)
+    return_id: Mapped[UUID] = mapped_column(NativeUUID, primary_key=True)
     """
     The ID of the return.
     """
@@ -115,7 +116,7 @@ class Return(Base):
     """
     The ID of the associated shipment that is used to get a return package.
     """
-    order_id: Mapped[UUID]
+    order_id: Mapped[UUID] = mapped_column(NativeUUID)
     """
     The ID of the order that is associated with the return.
     """
@@ -136,7 +137,7 @@ class ShipmentItem(Base):
     """
     __tablename__ = "shipment_items"
     shipment_id: Mapped[UUID] = mapped_column(
-        ForeignKey("shipments.shipment_id"), primary_key=True)
+        ForeignKey("shipments.shipment_id"), primary_key=True, native_uuid=True)
     """The ID of the shipment that this item is associated with."""
     upc: Mapped[int] = mapped_column(primary_key=True)
     """The UPC of the item."""
@@ -169,7 +170,7 @@ class Warehouse(Base):
     A warehouse that is used to store items and fulfill orders.
     """
     __tablename__ = "warehouses"
-    warehouse_id: Mapped[UUID] = mapped_column(primary_key=True)
+    warehouse_id: Mapped[UUID] = mapped_column(NativeUUID, primary_key=True)
     """The ID of the warehouse."""
     address: Mapped[str] = mapped_column(VARCHAR(255))
     """The address of the warehouse."""
@@ -186,6 +187,6 @@ class MockShipmentIDs(Base):
     Database to hold mock tracking numbers and hard coded statuses
     """
     __tablename__ = "mock_shipment_ids"
-    shipment_id: Mapped[UUID] = mapped_column(primary_key=True)
+    shipment_id: Mapped[UUID] = mapped_column(NativeUUID, primary_key=True)
     tracking_number: Mapped[int]
     message: Mapped[Status] = mapped_column(VARCHAR(100))
