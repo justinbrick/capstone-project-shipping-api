@@ -27,14 +27,29 @@ async def get_user_shipments(profile: AccountProfile = Depends(get_profile), db:
     Get all the shipments for a given user.
     """
 
-    shipments = db.query(schemas.Shipment)\
+    return db.query(schemas.Shipment)\
         .join(schemas.ShipmentDeliveryInfo, schemas.Shipment.shipment_id == schemas.ShipmentDeliveryInfo.shipment_id)\
         .join(schemas.Delivery, schemas.ShipmentDeliveryInfo.delivery_id == schemas.Delivery.delivery_id)\
         .join(schemas.Order, schemas.Delivery.order_id == schemas.Order.order_id)\
         .where(schemas.Order.customer_id == profile.user_id)\
         .all()
 
-    return shipments
+
+@router.get("/shipments/{shipment_id}/status")
+async def get_my_shipment_status(shipment_id: UUID, profile: AccountProfile = Depends(get_profile), db: Session = Depends(get_db)) -> ShipmentStatus:
+    """
+    Get the status of a shipment for the currently logged in user.
+    """
+
+    shipment = db.query(schemas.Shipment)\
+        .join(schemas.ShipmentDeliveryInfo, schemas.Shipment.shipment_id == schemas.ShipmentDeliveryInfo.shipment_id)\
+        .join(schemas.Delivery, schemas.ShipmentDeliveryInfo.delivery_id == schemas.Delivery.delivery_id)\
+        .join(schemas.Order, schemas.Delivery.order_id == schemas.Order.order_id)\
+        .where(schemas.Order.customer_id == profile.user_id)\
+        .where(schemas.Shipment.shipment_id == shipment_id)\
+        .first()
+
+    return await shipping_providers[shipment.provider].get_shipment_status(shipment.provider_shipment_id)
 
 
 def sort_all_shipments(shipments):
