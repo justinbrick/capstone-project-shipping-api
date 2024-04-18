@@ -18,7 +18,7 @@ from app.shipping.delivery import shipping_providers
 router = APIRouter()
 
 
-@router.get("/shipments")
+@router.get("/shipments", operation_id="get_personal_shipments")
 async def get_my_shipments(db: Session = Depends(get_db), profile: AccountProfile = Depends(get_profile)) -> list[Shipment]:
     """
     Get all the shipments related to the currently logged in user.
@@ -34,7 +34,7 @@ async def get_my_shipments(db: Session = Depends(get_db), profile: AccountProfil
         .all()
 
 
-@router.get("/shipments/{shipment_id}/status")
+@router.get("/shipments/{shipment_id}/status", operation_id="get_personal_shipment_status")
 async def get_my_shipment_status(shipment_id: UUID, db: Session = Depends(get_db), profile: AccountProfile = Depends(get_profile)) -> ShipmentStatus:
     """
     Get the status of a shipment for the currently logged in user.
@@ -58,7 +58,7 @@ async def get_my_shipment_status(shipment_id: UUID, db: Session = Depends(get_db
     return status
 
 
-@router.get("/deliveries")
+@router.get("/deliveries", operation_id="get_personal_deliveries")
 async def get_my_deliveries(db: Session = Depends(get_db), profile: AccountProfile = Depends(get_profile)) -> list[Delivery]:
     """
     Get all the deliveries related to this user.

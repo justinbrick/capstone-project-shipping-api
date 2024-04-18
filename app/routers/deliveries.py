@@ -17,7 +17,7 @@ from app.database import schemas
 router = APIRouter()
 
 
-@router.get("/{delivery_id}/shipments")
+@router.get("/{delivery_id}/shipments", operation_id="get_delivery_shipments")
 async def get_delivery_shipments(delivery_id: UUID, db: Session = Depends(get_db)) -> list[Shipment]:
     """
     Get all the shipments for a given delivery.
@@ -30,7 +30,7 @@ async def get_delivery_shipments(delivery_id: UUID, db: Session = Depends(get_db
     return shipments
 
 
-@router.post("/breakdown")
+@router.post("/breakdown", operation_id="make_delivery_breakdown")
 async def make_delivery_breakdown(request: CreateDeliveryRequest) -> ShipmentDeliveryBreakdown:
     """
     Make a delivery breakdown with the given request.

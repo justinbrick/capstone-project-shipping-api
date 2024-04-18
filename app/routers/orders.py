@@ -23,7 +23,7 @@ from ..shipping.providers.internal import client as internal_shipping
 router = APIRouter()
 
 
-@router.get("/{order_id}/deliveries")
+@router.get("/{order_id}/deliveries", operation_id="get_order_deliveries")
 async def get_order_deliveries(order_id: UUID, db: Session = Depends(get_db)) -> list[Delivery]:
     """
     Get all the deliveries for a given order.
@@ -49,7 +49,7 @@ async def get_order_deliveries(order_id: UUID, db: Session = Depends(get_db)) ->
     return delivery_models
 
 
-@router.post("/{order_id}/deliveries", status_code=201)
+@router.post("/{order_id}/deliveries", status_code=201, operation_id="create_order_delivery")
 async def create_order_delivery(order_id: UUID, request: CreateDeliveryRequest, db: Session = Depends(get_db)) -> Delivery:
     """
     Create a delivery for a given order.
@@ -141,7 +141,7 @@ async def create_order_delivery(order_id: UUID, request: CreateDeliveryRequest, 
         raise e
 
 
-@router.get("/{order_id}/returns")
+@router.get("/{order_id}/returns", operation_id="get_order_returns")
 async def get_order_returns(order_id: UUID, db: Session = Depends(get_db)) -> list[Return]:
     """
     Get all the returns for a given order.
