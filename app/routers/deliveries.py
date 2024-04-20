@@ -5,14 +5,15 @@ A router for creating and managing deliveries.
 __author__ = "Justin B. (justin@justin.directory)"
 
 from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app import get_db
-from app.shipping.delivery import get_delivery_breakdown
-from app.shipping.models import CreateDeliveryRequest, Delivery, Shipment, ShipmentDeliveryBreakdown
 from app.database import schemas
-
+from app.database.dependencies import get_db
+from app.shipping.delivery import get_delivery_breakdown
+from app.shipping.models import (CreateDeliveryRequest, Shipment,
+                                 ShipmentDeliveryBreakdown)
 
 router = APIRouter()
 

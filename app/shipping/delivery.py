@@ -6,13 +6,14 @@ __author__ = "Justin B. (justin@justin.directory)"
 
 
 from datetime import datetime, timedelta
-from random import choice
-from uuid import UUID
+
 from app.inventory.warehouse import get_warehouse, get_warehouse_chunks
-from app.shipping.models import CreateDeliveryRequest, DeliveryTimeResponse, Shipment, ShipmentDeliveryBreakdown, ShipmentItem
+from app.shipping.models import (CreateDeliveryRequest, DeliveryTimeResponse,
+                                 Shipment, ShipmentDeliveryBreakdown,
+                                 ShipmentItem)
+
 from .enums import SLA, Provider
 from .providers import ShipmentProvider, fedex, internal, ups, usps
-
 
 shipping_providers: dict[Provider, ShipmentProvider] = {
     Provider.FEDEX: fedex.client,

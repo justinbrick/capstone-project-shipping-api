@@ -5,12 +5,13 @@ Models for the shipping API.
 __author__ = "Justin B. (justin@justin.directory)"
 
 
-from typing import Optional
-from .enums import Provider, Status, SLA
-
-from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel, Field
+from typing import Optional
+from uuid import UUID
+
+from pydantic import BaseModel
+
+from .enums import SLA, Provider, Status
 
 
 class ShipmentItem(BaseModel):

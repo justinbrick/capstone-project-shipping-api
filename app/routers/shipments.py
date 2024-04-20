@@ -9,13 +9,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app import get_db
-from app.auth.dependencies import get_profile
-from app.auth.profile import AccountProfile
-from app.parameters.shipment import BaseShipmentQueryParams, FullShipmentQueryParams
-from app.shipping.models import Shipment, ShipmentStatus
-from app.shipping.delivery import shipping_providers as shipping_providers
 from app.database import schemas
+from app.database.dependencies import get_db
+from app.parameters.shipment import FullShipmentQueryParams
+from app.shipping.delivery import shipping_providers
+from app.shipping.models import Shipment, ShipmentStatus
 
 router = APIRouter()
 

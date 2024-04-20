@@ -2,12 +2,9 @@
 A pagination parameter is needed to limit the number of results returned by the API.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
 
-from fastapi import Depends
 from pydantic import BaseModel
-from sqlalchemy.orm import Query
-
-from app import get_db
 
 
 class PaginationParams(BaseModel):

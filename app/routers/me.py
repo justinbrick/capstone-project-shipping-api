@@ -5,17 +5,18 @@ Get information relevant to the currently logged in user.
 __author__ = "Justin B. (justin@justin.directory)"
 
 from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app import get_db
 from app.auth.dependencies import get_profile
 from app.auth.profile import AccountProfile
 from app.database import schemas
+from app.database.dependencies import get_db
 from app.parameters.shipment import BaseShipmentQueryParams
 from app.routers.users import get_user_deliveries, get_user_shipments
-from app.shipping.models import Delivery, Shipment, ShipmentStatus
 from app.shipping.delivery import shipping_providers
+from app.shipping.models import Delivery, Shipment, ShipmentStatus
 
 router = APIRouter()
 

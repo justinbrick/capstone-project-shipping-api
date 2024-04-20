@@ -2,12 +2,12 @@
 Shipment query parameters.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
 
 from typing import Optional
 from uuid import UUID
-from sqlalchemy.orm import Query
 
-from app.database import schemas
 from app.parameters.pagination import PaginationParams
 from app.shipping.enums import Provider, Status
 

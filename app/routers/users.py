@@ -2,19 +2,20 @@
 A router to get user related shipping information.
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
 
-from fastapi import APIRouter, HTTPException
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app import get_db
-from app.parameters.shipment import BaseShipmentQueryParams, FullShipmentQueryParams
-from app.routers.shipments import get_shipments
-from app.shipping.models import Delivery, Shipment, ShipmentStatus
-from app.shipping.delivery import shipping_providers as shipping_providers
 from app.database import schemas
+from app.database.dependencies import get_db
+from app.parameters.shipment import (BaseShipmentQueryParams,
+                                     FullShipmentQueryParams)
+from app.routers.shipments import get_shipments
+from app.shipping.delivery import shipping_providers
+from app.shipping.models import Delivery, Shipment, ShipmentStatus
 
 router = APIRouter()
 """
@@ -49,11 +50,10 @@ async def get_user_shipment(user_id: UUID, shipment_id: UUID, db: Session = Depe
     """
 
     shipment = db.query(schemas.Shipment)\
-        .join(schemas.ShipmentDeliveryInfo, schemas.Shipment.shipment_id == schemas.ShipmentDeliveryInfo.shipment_id)\
-        .join(schemas.Delivery, schemas.ShipmentDeliveryInfo.delivery_id == schemas.Delivery.delivery_id)\
-        .join(schemas.Order, schemas.Delivery.order_id == schemas.Order.order_id)\
-        .where(schemas.Order.customer_id == user_id)\
         .where(schemas.Shipment.shipment_id == shipment_id)\
+        .join(schemas.Shipment.delivery)\
+        .join(schemas.Delivery.order)\
+        .where(schemas.Order.customer_id == user_id)\
         .first()
 
     if shipment is None:

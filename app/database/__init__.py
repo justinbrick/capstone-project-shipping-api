@@ -4,11 +4,11 @@ Configuration details for the database.
 
 __author__ = "Justin B. (justin@justin.directory)"
 
+
 from os import environ
-from sys import modules
-import warnings
+
 from sqlalchemy import Engine, create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 DATABASE_URL = environ.get(
     "DATABASE_URL", "sqlite:///shipping.db?check_same_thread=False")

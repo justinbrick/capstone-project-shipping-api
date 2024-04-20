@@ -6,18 +6,21 @@ __author__ = "Justin B. (justin@justin.directory)"
 
 from datetime import datetime
 from uuid import UUID, uuid4
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.database.dependencies import get_db
 from app.inventory.warehouse import add_warehouse_stock, remove_warehouse_stock
-from app.routers.deliveries import get_delivery_shipments, make_delivery_breakdown
-from app.shipping.delivery import get_delivery_breakdown
+from app.routers.deliveries import (get_delivery_shipments,
+                                    make_delivery_breakdown)
 from app.shipping.enums import Provider, Status
 from app.shipping.shipment import create_shipment
 
 from ..database import schemas
-from app import get_db
-from ..shipping.models import CreateDeliveryRequest, CreateReturnRequest, CreateShipmentRequest, Delivery, DeliveryTimeResponse, Return, Shipment
+from ..shipping.models import (CreateDeliveryRequest, CreateReturnRequest,
+                               CreateShipmentRequest, Delivery,
+                               DeliveryTimeResponse, Return, Shipment)
 from ..shipping.providers.internal import client as internal_shipping
 
 router = APIRouter()

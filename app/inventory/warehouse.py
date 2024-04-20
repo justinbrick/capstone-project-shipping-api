@@ -6,23 +6,19 @@ __author__ = "Justin B. (justin@justin.directory)"
 
 from uuid import UUID
 
-from app import get_db
-from app.database import Session
-from app.database import schemas
+from geopy.distance import geodesic
+
+from app.database import Session, schemas
 from app.database.schemas import Warehouse
 from app.inventory.models import WarehouseStockAvailability
 from app.shipping.location import get_address_coordinates
-
-from geopy.distance import geodesic
-
-from app.shipping.models import DeliveryTimeResponse, ShipmentItem
+from app.shipping.models import ShipmentItem
 
 from . import client
 
 
 class OutOfStockException(Exception):
     """Raised when there is not enough stock to fulfill an order."""
-    pass
 
 
 async def get_warehouses() -> list[Warehouse]:
@@ -60,7 +56,7 @@ async def get_warehouse_by_address(address: str) -> Warehouse:
         warehouse = db.query(Warehouse).filter(
             Warehouse.address == address).first()
         if warehouse is None:
-            raise Exception("Warehouse not found.")
+            raise ValueError("Warehouse not found.")
         return warehouse
 
     response = await client.get(f"/warehouses/address/{address}")

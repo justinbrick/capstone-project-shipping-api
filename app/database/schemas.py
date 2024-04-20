@@ -6,17 +6,16 @@ All models must inherit from this base class, or it won't be created.
 
 __author__ = "Justin B. (justin@justin.directory)"
 
-from typing import Optional
 from datetime import datetime
-
+from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, VARCHAR, UUID as NativeUUID
+from sqlalchemy import UUID as NativeUUID
+from sqlalchemy import VARCHAR, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from app.shipping.enums import SLA
-
-from ..shipping.models import Provider, Status
+from app.shipping.models import Provider, Status
 
 
 class Base(DeclarativeBase):
@@ -61,7 +60,7 @@ class Shipment(Base):
     """The items that are associated with the shipment."""
     status: Mapped["ShipmentStatus"] = relationship()
     """The status of the shipment."""
-    delivery: Mapped["Delivery"] = relationship(
+    delivery: Mapped[Optional["Delivery"]] = relationship(
         secondary="shipment_delivery_info",
         back_populates="shipments"
     )

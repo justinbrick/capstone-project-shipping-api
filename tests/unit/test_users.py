@@ -2,6 +2,8 @@
 Testing the users router
 """
 
+__author__ = "Justin B. (justin@justin.directory)"
+
 from uuid import UUID, uuid4
 from fastapi import HTTPException
 import pytest

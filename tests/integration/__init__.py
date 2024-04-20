@@ -2,11 +2,12 @@
 Common constants that are used in testing.
 """
 
-from fastapi.testclient import TestClient
 from datetime import datetime
-import jwt
 
-from app import get_db
+import jwt
+from fastapi.testclient import TestClient
+
+from app.database.dependencies import get_db
 from app.main import app
 
 # An unsigned test JWT, used for testing purposes.

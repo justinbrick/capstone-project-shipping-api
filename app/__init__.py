@@ -1,9 +1,4 @@
-from .database import Session
-
-
-def get_db():
-    db = Session()
-    try:
-        yield db
-    finally:
-        db.close()
+"""
+The root of the application.
+Only contains a helper function to get the database session.
+"""

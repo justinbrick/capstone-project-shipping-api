@@ -6,17 +6,12 @@ __author__ = "Justin B. (justin@justin.directory)"
 
 
 import warnings
+from os import environ
+
 from async_lru import alru_cache
 from geopy.adapters import AioHTTPAdapter
 from geopy.geocoders import GoogleV3, Photon
-import sys
-from os import environ
 
-"""
-Caching for address coordinates is a relatively small number.
-This is because the coordinates will be queried in a quick burst.
-For debug purposes, the cache size is unlimited, as it will return random values.
-"""
 warehouse_api_key = environ.get("MAPS_API_KEY")
 
 if warehouse_api_key is None:
@@ -25,12 +20,15 @@ if warehouse_api_key is None:
     print("WARNING: Photon geocoding is prone to errors & rate limiting.")
     print("WARNING: To disable debug mode, run the application with the -O flag.")
 
-cache_size = 128
-if __debug__:
-    cache_size = None
+CACHE_SIZE = None if __debug__ else 512
+"""
+Caching for address coordinates is a relatively small number.
+This is because the coordinates will be queried in a quick burst.
+For debug purposes, the cache size is unlimited, as it will return random values.
+"""
 
 
-@alru_cache(maxsize=cache_size)
+@alru_cache(maxsize=CACHE_SIZE)
 async def get_address_coordinates(address: str) -> tuple[float, float]:
     """
     Get the coordinates for a given address.

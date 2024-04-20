@@ -5,19 +5,18 @@ Authentication & Authorization Middleware
 
 __author__ = "Justin B. (justin@justin.directory)"
 
-from typing import Optional
-from fastapi import Depends, Request, HTTPException
-from starlette.types import ASGIApp, Scope, Receive, Send
-from starlette.datastructures import Headers, URL
-from starlette.responses import PlainTextResponse
-import inspect
-import jwt
-from jwt.algorithms import RSAAlgorithm
-# import JWT encoding enums
-from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
-from app.auth.microsoft import get_json_keys
+from typing import Optional
+
+import jwt
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+from jwt.algorithms import RSAAlgorithm
+from starlette.datastructures import URL, Headers
+from starlette.responses import PlainTextResponse
+from starlette.types import ASGIApp, Receive, Scope, Send
+
 from app.auth import TENANT_SHORT_NAME
+from app.auth.microsoft import get_json_keys
 from app.auth.profile import AccountProfile
 
 ISSUER_URL = f"https://{TENANT_SHORT_NAME}.b2clogin.com/{TENANT_SHORT_NAME}.onmicrosoft.com/v2.0"
@@ -43,10 +42,14 @@ class EntraOAuth2Middleware:
 
     """
 
-    def __init__(self, app: ASGIApp, tenant_id: str, client_id: str, anonymous_endpoints: list[str] = []) -> None:
+    def __init__(self, app: ASGIApp, tenant_id: str, client_id: str, anonymous_endpoints: Optional[list[str]] = None) -> None:
         self.app = app
         self.tenant_id = tenant_id
         self.client_id = client_id
+
+        if anonymous_endpoints is None:
+            anonymous_endpoints = []
+
         self.anonymous_endpoints = anonymous_endpoints
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
