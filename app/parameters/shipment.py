@@ -28,6 +28,8 @@ class BaseShipmentQueryParams(PaginationParams):
     """The shipping address to filter by. This is a wildcard search."""
     delivery_id: Optional[UUID] = None
     """The delivery ID to filter by."""
+    tracking_id: Optional[str] = None
+    """The tracking ID to filter by. This is a wildcard search."""
 
 
 class FullShipmentQueryParams(BaseShipmentQueryParams):

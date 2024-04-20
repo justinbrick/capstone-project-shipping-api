@@ -72,6 +72,10 @@ async def get_shipments(params: FullShipmentQueryParams = Depends(), db: Session
         query = query.filter(schemas.Shipment.shipping_address.ilike(
             f"%{params.shipping_address}%"))
 
+    if params.tracking_id is not None:
+        query = query.filter(schemas.Shipment.provider_shipment_id.ilike(
+            f"%{params.tracking_id}%"))
+
     if params.date_desc:
         query = query.order_by(schemas.Shipment.created_at.desc())
     else:
