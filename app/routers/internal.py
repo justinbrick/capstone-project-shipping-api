@@ -43,7 +43,7 @@ async def get_open_shipments(params: PaginationParams = Depends(), db: Session =
     return open_shipments
 
 
-@router.post("/open_shipments/{shipment_id}/claim", operation_id="claim_shipment")
+@router.post("/open_shipments/{shipment_id}/claim", operation_id="claim_open_shipment")
 async def claim_shipment(shipment_id: UUID, profile: AccountProfile = Depends(get_profile), db: Session = Depends(get_db)) -> Shipment:
     """
     Claim a shipment for delivery.

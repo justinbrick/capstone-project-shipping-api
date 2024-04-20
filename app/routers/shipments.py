@@ -60,7 +60,8 @@ async def get_shipments(params: FullShipmentQueryParams = Depends(), db: Session
         query = query.filter(schemas.Shipment.provider == params.provider)
 
     if params.status is not None:
-        query = query.join(schemas.Shipment.status)\
+        query = query\
+            .join(schemas.Shipment.status)\
             .filter(schemas.ShipmentStatus.message == params.status)
 
     if params.from_address is not None:
