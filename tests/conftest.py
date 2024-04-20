@@ -19,7 +19,8 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.auth.profile import AccountProfile
 from app.database import engine
 from app.database.schemas import (Base, Delivery, Order, Shipment,
-                                  ShipmentItem, ShipmentStatus, Warehouse,
+                                  ShipmentItem, ShipmentStatus,
+                                  ShippingEmployeeReservation, Warehouse,
                                   WarehouseItem)
 from app.shipping.enums import SLA, Provider, Status
 
@@ -95,6 +96,9 @@ mock_delivery_shipments = [
             expected_at=datetime.now()+timedelta(days=3),
             updated_at=datetime.now(),
             delivered_at=None
+        ),
+        reservation=ShippingEmployeeReservation(
+            employee_id=mock_user_id
         )
     ),
     Shipment(
@@ -116,6 +120,7 @@ mock_delivery_shipments = [
         )
     )
 ]
+mock_shipment_id = mock_delivery_shipments[0].shipment_id
 
 mock_delivery = Delivery(
     delivery_id=mock_delivery_id,
@@ -155,6 +160,9 @@ def setup_db(db: Engine):
 
 @pytest.fixture(scope="session")
 def delivery_id():
+    """
+    Returns a delivery_id.
+    """
     return mock_delivery_id
 
 
@@ -173,16 +181,11 @@ def session(db: Engine):
 
 
 @pytest.fixture(scope="function")
-def shipment_id(session: Session) -> UUID:
+def shipment_id() -> UUID:
     """
-    Returns an example shipment ID.
-
-    TODO: Needs review, is this worth testing for if it does a query anyway?
+    Returns shipment_id.
     """
-    return session\
-        .query(Shipment)\
-        .first()\
-        .shipment_id
+    return mock_shipment_id
 
 
 @pytest.fixture(scope="function")

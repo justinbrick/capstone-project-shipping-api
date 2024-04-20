@@ -9,8 +9,12 @@ from uuid import UUID
 import pytest
 from sqlalchemy.orm.session import Session
 
+from app.auth.profile import AccountProfile
 from app.parameters.shipment import FullShipmentQueryParams
-from app.routers.shipments import get_shipment, get_shipments
+from app.routers.shipments import (get_shipment, get_shipments,
+                                   update_shipment_status)
+from app.shipping.enums import Status
+from app.shipping.models import ShipmentStatusPatchRequest
 
 
 @pytest.mark.asyncio
@@ -51,3 +55,19 @@ async def test_get_shipments_from_invalid_delivery_id(session: Session):
     shipment_query = FullShipmentQueryParams(delivery_id="invalid")
     shipments = await get_shipments(shipment_query, session)
     assert len(shipments) == 0
+
+
+@pytest.mark.asyncio
+async def test_update_shipment_status(shipment_id: UUID, session: Session, account: AccountProfile):
+    """
+    Test updating the shipment status.
+    """
+    # TODO: Needs get_shipment_status to be implemented on shipment providers.
+    # shipment = await get_shipment_status(shipment_id, session)
+    # assert shipment.status == "PENDING"
+
+    new_status = ShipmentStatusPatchRequest(
+        message=Status.SHIPPED
+    )
+    status = await update_shipment_status(shipment_id, new_status, session, account)
+    assert status.message == Status.SHIPPED

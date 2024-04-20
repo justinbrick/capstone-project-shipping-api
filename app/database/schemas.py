@@ -65,6 +65,8 @@ class Shipment(Base):
         back_populates="shipments"
     )
     """The delivery that is associated with the shipment."""
+    reservation: Mapped[Optional["ShippingEmployeeReservation"]
+                        ] = relationship()
 
 
 class ShipmentDeliveryInfo(Base):
@@ -195,16 +197,6 @@ class Warehouse(Base):
     """The longitude of the warehouse."""
     items: Mapped[list["WarehouseItem"]] = relationship()
     """The items that are stored in the warehouse."""
-
-
-class MockShipmentIDs(Base):
-    """
-    Database to hold mock tracking numbers and hard coded statuses
-    """
-    __tablename__ = "mock_shipment_ids"
-    shipment_id: Mapped[UUID] = mapped_column(NativeUUID, primary_key=True)
-    tracking_number: Mapped[int]
-    message: Mapped[Status] = mapped_column(VARCHAR(100))
 
 
 class ShippingEmployeeReservation(Base):

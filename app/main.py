@@ -27,9 +27,12 @@ app = FastAPI()
 
 # Middleware
 anonymous_endpoints = ["/docs", "/openapi.json", "/about"]
-app.add_middleware(EntraOAuth2Middleware, client_id=CLIENT_ID,
-                   tenant_id=TENANT_ID, anonymous_endpoints=anonymous_endpoints)
-
+app.add_middleware(
+    EntraOAuth2Middleware,
+    client_id=CLIENT_ID,
+    tenant_id=TENANT_ID,
+    anonymous_endpoints=anonymous_endpoints
+)
 # Routers
 app.include_router(
     shipments.router,
@@ -47,7 +50,11 @@ app.include_router(
         Depends(has_roles(["SHP-DLR"]))
     ]
 )
-app.include_router(me.router, prefix="/me", tags=["me"])
+app.include_router(
+    me.router,
+    prefix="/me",
+    tags=["me"]
+)
 app.include_router(
     users.router,
     prefix="/users",
@@ -56,8 +63,16 @@ app.include_router(
         Depends(has_roles(["SHP-STF"]))
     ]
 )
-app.include_router(returns.router, prefix="/returns", tags=["returns"])
-app.include_router(orders.router, prefix="/orders", tags=["orders"])
+app.include_router(
+    returns.router,
+    prefix="/returns",
+    tags=["returns"]
+)
+app.include_router(
+    orders.router,
+    prefix="/orders",
+    tags=["orders"]
+)
 
 
 @app.get("/about", response_class=HTMLResponse)
@@ -69,6 +84,9 @@ async def about() -> str:
 
 
 def openapi():
+    """
+    Creates a custom OpenAPI document with version 3.0.3
+    """
     if app.openapi_schema:
         return app.openapi_schema
 
@@ -94,7 +112,6 @@ def openapi():
 app.openapi = openapi
 
 if __name__ == "__main__":
-    from os import environ
 
     import uvicorn
     host_name = environ.get("HOST_NAME", "127.0.0.1")

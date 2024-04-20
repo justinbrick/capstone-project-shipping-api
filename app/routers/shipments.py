@@ -4,6 +4,7 @@ A router containing endpoints for getting shipment information & creating shipme
 
 __author__ = "Justin B. (justin@justin.directory)"
 
+from datetime import datetime
 from uuid import UUID
 
 import sqlalchemy
@@ -11,11 +12,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import cast
 from sqlalchemy.orm import Session
 
+from app.auth.profile import AccountProfile
 from app.database import schemas
 from app.database.dependencies import get_db
 from app.parameters.shipment import FullShipmentQueryParams
 from app.shipping.delivery import shipping_providers
-from app.shipping.models import Shipment, ShipmentStatus
+from app.shipping.enums import Provider
+from app.shipping.models import (Shipment, ShipmentStatus,
+                                 ShipmentStatusPatchRequest)
 
 router = APIRouter()
 
@@ -104,3 +108,34 @@ async def get_shipment_status(shipment_id: UUID, db: Session = Depends(get_db)) 
     provider = shipping_providers[shipment.provider]
     status = await provider.get_shipment_status(shipment.provider_shipment_id)
     return status
+
+
+@router.patch("/{shipment_id}/status", operation_id="update_shipment_status")
+async def update_shipment_status(shipment_id: UUID, status: ShipmentStatusPatchRequest, db: Session = Depends(get_db), profile: AccountProfile = Depends()) -> ShipmentStatus:
+    """
+    Update the status of a shipment.
+    """
+
+    shipment = db.get(schemas.Shipment, shipment_id)
+
+    if shipment is None:
+        raise HTTPException(status_code=404, detail="Shipment not found.")
+
+    if shipment.reservation is None or shipment.reservation.employee_id != profile.user_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot update shipment status for unreserved shipments."
+        )
+
+    if shipment.provider is not Provider.INTERNAL:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot update shipment status for non-internal shipments."
+        )
+
+    shipment.status.message = status.message
+    shipment.status.updated_at = datetime.now()
+
+    db.commit()
+
+    return shipment.status

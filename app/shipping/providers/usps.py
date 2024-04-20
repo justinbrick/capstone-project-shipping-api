@@ -6,18 +6,21 @@ __author__ = "Justin B. (justin@justin.directory)"
 
 import random
 from uuid import UUID
+
 from app.shipping.enums import Provider
+from app.shipping.models import ShipmentStatus
 from app.shipping.providers import ShipmentProvider
-from app.shipping.models import CreateShipmentRequest, Shipment, ShipmentStatus
-from datetime import datetime
 
 
 class USPSShipmentProvider(ShipmentProvider):
+    """
+    Shipment Provider for USPS
+    """
+
     def __init__(self) -> None:
         self.provider_type = Provider.USPS
         self.speed_mult = 2.5
         self.price_mult = 1
-        pass
 
     async def get_shipment_status(self, tracking_identifier: str) -> ShipmentStatus:
         return await super().get_shipment_status(tracking_identifier)
