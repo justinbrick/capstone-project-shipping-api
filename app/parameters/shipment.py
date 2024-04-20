@@ -26,8 +26,8 @@ class BaseShipmentQueryParams(PaginationParams):
     """The address to filter by. This is a wildcard search."""
     shipping_address: Optional[str] = None
     """The shipping address to filter by. This is a wildcard search."""
-    delivery_id: Optional[UUID] = None
-    """The delivery ID to filter by."""
+    delivery_id: Optional[str] = None
+    """The delivery ID to filter by. This is a partial UUID."""
     tracking_id: Optional[str] = None
     """The tracking ID to filter by. This is a wildcard search."""
 

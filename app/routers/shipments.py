@@ -6,7 +6,9 @@ __author__ = "Justin B. (justin@justin.directory)"
 
 from uuid import UUID
 
+import sqlalchemy
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import cast
 from sqlalchemy.orm import Session
 
 from app.database import schemas
@@ -54,7 +56,12 @@ async def get_shipments(params: FullShipmentQueryParams = Depends(), db: Session
 
     if params.delivery_id is not None:
         query = query.filter(
-            schemas.ShipmentDeliveryInfo.delivery_id == params.delivery_id)
+            cast(
+                schemas.Delivery.delivery_id, sqlalchemy.String
+            ).ilike(
+                f"%{params.delivery_id}%"
+            )
+        )
 
     if params.provider is not None:
         query = query.filter(schemas.Shipment.provider == params.provider)
