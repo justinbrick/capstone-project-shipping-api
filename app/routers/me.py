@@ -6,16 +6,15 @@ __author__ = "Justin B. (justin@justin.directory)"
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import get_profile
 from app.auth.profile import AccountProfile
-from app.database import schemas
 from app.database.dependencies import get_db
 from app.parameters.shipment import BaseShipmentQueryParams
-from app.routers.users import get_user_deliveries, get_user_shipments
-from app.shipping.delivery import shipping_providers
+from app.routers.users import (get_user_deliveries, get_user_shipment_status,
+                               get_user_shipments)
 from app.shipping.models import Delivery, Shipment, ShipmentStatus
 
 router = APIRouter()
@@ -38,21 +37,7 @@ async def get_my_shipment_status(shipment_id: UUID, db: Session = Depends(get_db
     """
     profile_id = profile.user_id
 
-    related_shipment = db.query(schemas.Shipment)\
-        .join(schemas.ShipmentDeliveryInfo, schemas.Shipment.shipment_id == schemas.ShipmentDeliveryInfo.shipment_id)\
-        .join(schemas.Delivery, schemas.ShipmentDeliveryInfo.delivery_id == schemas.Delivery.delivery_id)\
-        .join(schemas.Order, schemas.Delivery.order_id == schemas.Order.order_id)\
-        .where(schemas.Order.customer_id == profile_id)\
-        .where(schemas.Shipment.shipment_id == shipment_id)\
-        .first()
-
-    if related_shipment is None:
-        raise HTTPException(status_code=404, detail="Shipment not found.")
-
-    provider = shipping_providers[related_shipment.provider]
-    status = await provider.get_shipment_status(related_shipment.provider_shipment_id)
-
-    return status
+    return await get_user_shipment_status(shipment_id, profile_id, db)
 
 
 @router.get("/deliveries", operation_id="get_personal_deliveries")
