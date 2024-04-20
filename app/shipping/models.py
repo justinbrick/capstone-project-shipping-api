@@ -11,7 +11,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from .enums import SLA, Provider, Status
+from app.shipping.enums import SLA, Provider, Status
 
 
 class ShipmentItem(BaseModel):

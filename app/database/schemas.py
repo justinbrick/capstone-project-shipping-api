@@ -205,3 +205,16 @@ class MockShipmentIDs(Base):
     shipment_id: Mapped[UUID] = mapped_column(NativeUUID, primary_key=True)
     tracking_number: Mapped[int]
     message: Mapped[Status] = mapped_column(VARCHAR(100))
+
+
+class ShippingEmployeeReservation(Base):
+    """
+    An employee reservation represents a reservation for a given employee to handle a shipment.
+    """
+    __tablename__ = "shipping_employee_reservations"
+    employee_id: Mapped[UUID] = mapped_column(NativeUUID, primary_key=True)
+    """The ID of the employee that is reserved for the shipment."""
+    shipment_id: Mapped[UUID] = mapped_column(
+        ForeignKey("shipments.shipment_id")
+    )
+    """The ID of the shipment that the employee is reserved for."""

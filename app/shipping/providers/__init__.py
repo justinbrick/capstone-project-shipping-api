@@ -7,11 +7,13 @@ __author__ = "Justin B. (justin@justin.directory)"
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from uuid import UUID, uuid4
+
 from geopy.distance import geodesic
 
 from app.shipping.enums import Provider, Status
-from ..models import Shipment, ShipmentStatus, CreateShipmentRequest
 from app.shipping.location import get_address_coordinates
+
+from ..models import CreateShipmentRequest, Shipment, ShipmentStatus
 
 
 class ShipmentProvider(ABC):

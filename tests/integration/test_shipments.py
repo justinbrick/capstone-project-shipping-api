@@ -2,16 +2,6 @@
 Integration tests for the shipments endpoint.
 """
 
-from typing import Optional
-from uuid import uuid4
-
-import pytest
-
-from app.shipping.enums import SLA
-from app.shipping.models import CreateDeliveryRequest, ShipmentItem
-
-from . import test_client
-
 
 # @pytest.mark.dependency()
 # def test_create_shipment():

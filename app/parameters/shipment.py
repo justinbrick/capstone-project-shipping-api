@@ -16,6 +16,8 @@ class BaseShipmentQueryParams(PaginationParams):
     """
     Common parameters to query for in multiple shipments.
     """
+    date_desc: bool = True
+    """Whether or not to sort by date descending."""
     status: Optional[Status] = None
     """The shipment status to filter by."""
     provider: Optional[Provider] = None

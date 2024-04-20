@@ -44,18 +44,12 @@ async def get_shipments(params: FullShipmentQueryParams = Depends(), db: Session
 
     # If we have a filter that requires table joins, we add them here.
     if params.delivery_id is not None or params.user_id is not None:
-        query = query.join(
-            schemas.ShipmentDeliveryInfo,
-            schemas.Shipment.shipment_id == schemas.ShipmentDeliveryInfo.shipment_id
-        ).join(
-            schemas.Delivery,
-            schemas.ShipmentDeliveryInfo.delivery_id == schemas.Delivery.delivery_id
-        )
+        query = query.join(schemas.Shipment.delivery)
 
     # Same for delivery ID, but requires additional joins.
     if params.user_id is not None:
         query = query\
-            .join(schemas.Order, schemas.Delivery.order_id == schemas.Order.order_id)\
+            .join(schemas.Delivery.order)\
             .filter(schemas.Order.customer_id == params.user_id)
 
     if params.delivery_id is not None:
@@ -66,7 +60,8 @@ async def get_shipments(params: FullShipmentQueryParams = Depends(), db: Session
         query = query.filter(schemas.Shipment.provider == params.provider)
 
     if params.status is not None:
-        query = query.filter(schemas.Shipment.status == params.status)
+        query = query.join(schemas.Shipment.status)\
+            .filter(schemas.ShipmentStatus.message == params.status)
 
     if params.from_address is not None:
         query = query.filter(schemas.Shipment.from_address.ilike(
@@ -75,6 +70,11 @@ async def get_shipments(params: FullShipmentQueryParams = Depends(), db: Session
     if params.shipping_address is not None:
         query = query.filter(schemas.Shipment.shipping_address.ilike(
             f"%{params.shipping_address}%"))
+
+    if params.date_desc:
+        query = query.order_by(schemas.Shipment.created_at.desc())
+    else:
+        query = query.order_by(schemas.Shipment.created_at.asc())
 
     query = query.limit(params.limit).offset(params.offset)
 

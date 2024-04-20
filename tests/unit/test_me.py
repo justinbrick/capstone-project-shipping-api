@@ -8,7 +8,7 @@ __author__ = "Justin B. (justin@justin.directory)"
 import pytest
 
 from app.parameters.shipment import BaseShipmentQueryParams
-from app.routers.me import get_my_deliveries, get_my_shipment_status, get_my_shipments
+from app.routers.me import get_my_deliveries, get_my_shipments
 
 
 @pytest.mark.asyncio

@@ -4,19 +4,23 @@ Configuration file for pytest.
 
 __author__ = "Justin B. (justin@justin.directory)"
 
-from datetime import datetime, timedelta
+# pylint: disable=W0621
+
 import os
+from datetime import datetime, timedelta
 from random import choice
 from uuid import UUID, uuid4
-from dotenv import load_dotenv
-import pytest
-from sqlalchemy import Engine, create_engine
-from sqlalchemy.orm import sessionmaker, Session
 
+import pytest
+from dotenv import load_dotenv
+from sqlalchemy import Engine
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.auth.profile import AccountProfile
-from app.database.schemas import Delivery, Order, Shipment, ShipmentItem, ShipmentStatus, Warehouse, WarehouseItem, Base
 from app.database import engine
+from app.database.schemas import (Base, Delivery, Order, Shipment,
+                                  ShipmentItem, ShipmentStatus, Warehouse,
+                                  WarehouseItem)
 from app.shipping.enums import SLA, Provider, Status
 
 
@@ -79,7 +83,7 @@ mock_delivery_shipments = [
         shipment_id=uuid4(),
         shipping_address="2683 NC-24, Warsaw, NC 28398",
         from_address=test_warehouses[0].address,
-        provider=choice(list(Provider)),
+        provider=Provider.INTERNAL,
         provider_shipment_id=str(uuid4()),
         created_at=datetime.now(),
         items=[
@@ -97,7 +101,7 @@ mock_delivery_shipments = [
         shipment_id=uuid4(),
         shipping_address="2683 NC-24, Warsaw, NC 28398",
         from_address=test_warehouses[0].address,
-        provider=choice(list(Provider)),
+        provider=Provider.UPS,
         provider_shipment_id=str(uuid4()),
         created_at=datetime.now(),
         items=[
