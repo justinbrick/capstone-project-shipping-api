@@ -13,7 +13,6 @@ from app.shipping.models import CreateDeliveryRequest, CreateReturnRequest, Ship
 import pytest
 from sqlalchemy.orm.session import Session
 
-
 from uuid import uuid4
 
 

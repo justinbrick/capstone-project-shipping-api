@@ -9,6 +9,7 @@ from uuid import UUID
 import pytest
 from sqlalchemy.orm.session import Session
 from app.auth.profile import AccountProfile
+from app.parameters.shipment import BaseShipmentQueryParams, FullShipmentQueryParams
 from app.routers.deliveries import make_delivery_breakdown
 from app.routers.shipments import get_shipment, get_shipments
 from app.shipping.enums import SLA
@@ -28,16 +29,17 @@ async def test_get_shipment(session: Session, shipment_id: UUID):
 
 
 @pytest.mark.asyncio
-async def test_get_shipments(session: Session, account: AccountProfile):
+async def test_get_shipments(session: Session):
     """
     Tests the retrieval of all shipments.
     """
-    shipments = await get_shipments(session, account)
+    shipment_query = FullShipmentQueryParams()
+    shipments = await get_shipments(shipment_query, session)
     assert len(shipments) == 2
 
 
 @pytest.mark.asyncio
-async def test_create_delivery_breakdown(session: Session):
+async def test_make_delivery_breakdown():
     """
     Tests the creation of a delivery breakdown.
     """

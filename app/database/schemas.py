@@ -36,7 +36,7 @@ class Order(Base):
     """The ID of the customer that placed the order."""
     created_at: Mapped[datetime]
     """The date and time that the order was created."""
-    deliveries: Mapped[list["Delivery"]] = relationship()
+    deliveries: Mapped[list["Delivery"]] = relationship(back_populates="order")
 
 
 class Shipment(Base):
@@ -46,13 +46,26 @@ class Shipment(Base):
     """
     __tablename__ = "shipments"
     shipment_id: Mapped[UUID] = mapped_column(NativeUUID, primary_key=True)
+    """The ID of the shipment. This is a primary key"""
     from_address: Mapped[str] = mapped_column(VARCHAR(255))
+    """Where the shipment is coming from."""
     shipping_address: Mapped[str] = mapped_column(VARCHAR(255))
+    """Where the shipment is going."""
     provider: Mapped[Provider]
+    """The provider that is handling the shipment."""
     provider_shipment_id: Mapped[str] = mapped_column(VARCHAR(100))
+    """The ID of the shipment that the provider uses."""
     created_at: Mapped[datetime]
+    """The date and time that the shipment was created."""
     items: Mapped[list["ShipmentItem"]] = relationship()
+    """The items that are associated with the shipment."""
     status: Mapped["ShipmentStatus"] = relationship()
+    """The status of the shipment."""
+    delivery: Mapped["Delivery"] = relationship(
+        secondary="shipment_delivery_info",
+        back_populates="shipments"
+    )
+    """The delivery that is associated with the shipment."""
 
 
 class ShipmentDeliveryInfo(Base):
@@ -77,6 +90,8 @@ class Delivery(Base):
     """The ID of the delivery."""
     order_id: Mapped[UUID] = mapped_column(ForeignKey("orders.order_id"))
     """The ID of the order that is associated with the delivery."""
+    order: Mapped[Order] = relationship(back_populates="deliveries")
+    """The order that is associated with the delivery."""
     recipient_address: Mapped[str] = mapped_column(VARCHAR(255))
     """The address that the delivery is going to."""
     created_at: Mapped[datetime]
@@ -86,7 +101,8 @@ class Delivery(Base):
     delivery_sla: Mapped[SLA]
     """The service level agreement that the delivery is under."""
     shipments: Mapped[list[Shipment]] = relationship(
-        secondary="shipment_delivery_info"
+        secondary="shipment_delivery_info",
+        back_populates="delivery"
     )
     """The shipments that are associated with the delivery."""
 
@@ -137,7 +153,7 @@ class ShipmentItem(Base):
     """
     __tablename__ = "shipment_items"
     shipment_id: Mapped[UUID] = mapped_column(
-        ForeignKey("shipments.shipment_id"), primary_key=True, native_uuid=True)
+        ForeignKey("shipments.shipment_id"), primary_key=True)  # potential needed? native_uuid
     """The ID of the shipment that this item is associated with."""
     upc: Mapped[int] = mapped_column(primary_key=True)
     """The UPC of the item."""

@@ -7,6 +7,7 @@ __author__ = "Justin B. (justin@justin.directory)"
 
 import pytest
 
+from app.parameters.shipment import BaseShipmentQueryParams
 from app.routers.me import get_my_deliveries, get_my_shipment_status, get_my_shipments
 
 
@@ -15,7 +16,8 @@ async def test_get_my_shipments(session, account):
     """
     Tests the retrieval of all shipments.
     """
-    shipments = await get_my_shipments(session, account)
+    params = BaseShipmentQueryParams()
+    shipments = await get_my_shipments(params, account, session)
     assert len(shipments) == 2
 
 

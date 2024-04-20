@@ -12,6 +12,8 @@ from app import get_db
 from app.auth.dependencies import get_profile
 from app.auth.profile import AccountProfile
 from app.database import schemas
+from app.parameters.shipment import BaseShipmentQueryParams
+from app.routers.users import get_user_deliveries, get_user_shipments
 from app.shipping.models import Delivery, Shipment, ShipmentStatus
 from app.shipping.delivery import shipping_providers
 
@@ -19,19 +21,13 @@ router = APIRouter()
 
 
 @router.get("/shipments", operation_id="get_personal_shipments")
-async def get_my_shipments(db: Session = Depends(get_db), profile: AccountProfile = Depends(get_profile)) -> list[Shipment]:
+async def get_my_shipments(params: BaseShipmentQueryParams = Depends(), profile: AccountProfile = Depends(get_profile), db: Session = Depends(get_db)) -> list[Shipment]:
     """
     Get all the shipments related to the currently logged in user.
     """
     profile_id = profile.user_id
 
-    # Shipment -> ShipmentDeliveryInfo -> Delivery -> Order
-    return db.query(schemas.Shipment)\
-        .join(schemas.ShipmentDeliveryInfo, schemas.Shipment.shipment_id == schemas.ShipmentDeliveryInfo.shipment_id)\
-        .join(schemas.Delivery, schemas.ShipmentDeliveryInfo.delivery_id == schemas.Delivery.delivery_id)\
-        .join(schemas.Order, schemas.Delivery.order_id == schemas.Order.order_id)\
-        .where(schemas.Order.customer_id == profile_id)\
-        .all()
+    return await get_user_shipments(profile_id, params, db)
 
 
 @router.get("/shipments/{shipment_id}/status", operation_id="get_personal_shipment_status")
@@ -65,7 +61,4 @@ async def get_my_deliveries(db: Session = Depends(get_db), profile: AccountProfi
     """
     profile_id = profile.user_id
 
-    return db.query(schemas.Delivery)\
-        .join(schemas.Order, schemas.Delivery.order_id == schemas.Order.order_id)\
-        .where(schemas.Order.customer_id == profile_id)\
-        .all()
+    return await get_user_deliveries(profile_id, db)

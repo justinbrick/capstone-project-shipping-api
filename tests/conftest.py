@@ -15,7 +15,7 @@ from sqlalchemy.orm import sessionmaker, Session
 
 
 from app.auth.profile import AccountProfile
-from app.database.schemas import Delivery, Order, Shipment, ShipmentDeliveryInfo, ShipmentItem, ShipmentStatus, Warehouse, WarehouseItem, Base
+from app.database.schemas import Delivery, Order, Shipment, ShipmentItem, ShipmentStatus, Warehouse, WarehouseItem, Base
 from app.database import engine
 from app.shipping.enums import SLA, Provider, Status
 
@@ -155,14 +155,17 @@ def delivery_id():
 
 
 @pytest.fixture(scope="function")
-def session(db):
+def session(db: Engine):
     """
     Returns a database session.
     """
-    session_factory = sessionmaker(bind=db)
-    session = session_factory()
+    connection = db.connect()
+    transaction = connection.begin()
+    session = Session(bind=connection)
     yield session
     session.close()
+    transaction.rollback()
+    connection.close()
 
 
 @pytest.fixture(scope="function")
@@ -179,7 +182,7 @@ def shipment_id(session: Session) -> UUID:
 
 
 @pytest.fixture(scope="function")
-def account():
+def account() -> AccountProfile:
     """
     Returns a mock account profile with certain claims.
     """
