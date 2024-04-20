@@ -92,7 +92,7 @@ class EntraOAuth2Middleware:
                     "verify_jti": False
                 }
                 debug_jwt = jwt.decode(token, options=options)
-                scope["jwt"] = debug_jwt
+                scope["b2c_profile"] = AccountProfile(debug_jwt)
                 await self.app(scope, receive, send)
                 return
 
