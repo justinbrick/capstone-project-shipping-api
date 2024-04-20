@@ -7,8 +7,8 @@ __author__ = "Justin B. (justin@justin.directory)"
 from os import environ
 
 from fastapi import Depends, FastAPI
-from fastapi.responses import HTMLResponse
 from fastapi.openapi.utils import get_openapi
+from fastapi.responses import HTMLResponse
 
 from app.auth import CLIENT_ID, TENANT_ID
 from app.auth.dependencies import has_roles
@@ -16,7 +16,6 @@ from app.database import engine
 from app.database.schemas import Base
 from app.middleware.authenticate import EntraOAuth2Middleware
 from app.routers import internal, me, orders, returns, shipments, users
-
 
 SERVER_URL = environ.get("SERVER_URL", "http://127.0.0.1:8000")
 
@@ -77,7 +76,7 @@ def openapi():
         title="BitBuggy Shipping",
         version="2.0.1",
         openapi_version="3.0.3",
-        summary="BitBuggy Shipping",
+        # summary="BitBuggy Shipping",
         description="Management of shipping and delivery information.",
         routes=app.routes,
         servers=[
