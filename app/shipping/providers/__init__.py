@@ -35,7 +35,6 @@ class ShipmentProvider(ABC):
         :param tracking_identifier: the tracking identifier to get the status for
         :return: the status of the shipment
         """
-        raise NotImplementedError()
 
     async def get_shipment_location(self, tracking_identifier: str) -> str | None:
         """
@@ -120,3 +119,35 @@ class ShipmentProvider(ABC):
         price = (dist / 100 * 5) * self.price_mult
 
         return price
+
+
+async def get_current_delivery_progress_estimate(shipment: Shipment) -> float:
+    """
+    Get the current delivery progress of a shipment.
+    :param shipment: the shipment to get the progress for
+    :return: the current delivery progress
+    """
+    if shipment.status.message == Status.DELIVERED:
+        return 1.0
+    elif shipment.status.message == Status.PENDING:
+        return 0.0
+    else:
+        elapsed = datetime.now() - shipment.created_at
+        expected = shipment.status.expected_at - shipment.created_at
+        return elapsed / expected
+
+
+async def get_delivery_distance_away(shipment: Shipment) -> float:
+    """
+    Get the distance away from the destination of a shipment.
+    :param shipment: the shipment to get the distance for
+    :return: the distance away from the destination
+    """
+    if shipment.status.message == Status.DELIVERED:
+        return 0.0
+    elif shipment.status.message == Status.PENDING:
+        return 1.0
+    else:
+        to_coords = await get_address_coordinates(shipment.shipping_address)
+        from_coords = await get_address_coordinates(shipment.from_address)
+        dist = geodesic(to_coords, from_coords).miles
