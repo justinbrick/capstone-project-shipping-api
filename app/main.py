@@ -10,6 +10,10 @@ from fastapi import Depends, FastAPI
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import HTMLResponse
 
+if __name__ == "__main__":
+    import dotenv
+    dotenv.load_dotenv()
+
 from app.auth import CLIENT_ID, TENANT_ID
 from app.auth.dependencies import has_roles
 from app.database import engine
@@ -112,8 +116,8 @@ def openapi():
 app.openapi = openapi
 
 if __name__ == "__main__":
-
     import uvicorn
+
     host_name = environ.get("HOST_NAME", "127.0.0.1")
     host_port = int(environ.get("HOST_PORT", "8000"))
     uvicorn.run(app, host=host_name, port=host_port)
