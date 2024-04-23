@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import cast
 from sqlalchemy.orm import Session
 
+from app.auth.dependencies import get_profile
 from app.auth.profile import AccountProfile
 from app.database import schemas
 from app.database.dependencies import get_db
@@ -111,7 +112,7 @@ async def get_shipment_status(shipment_id: UUID, db: Session = Depends(get_db)) 
 
 
 @router.patch("/{shipment_id}/status", operation_id="update_shipment_status")
-async def update_shipment_status(shipment_id: UUID, status: ShipmentStatusPatchRequest, db: Session = Depends(get_db), profile: AccountProfile = Depends()) -> ShipmentStatus:
+async def update_shipment_status(shipment_id: UUID, status: ShipmentStatusPatchRequest, db: Session = Depends(get_db), profile: AccountProfile = Depends(get_profile)) -> ShipmentStatus:
     """
     Update the status of a shipment.
     """

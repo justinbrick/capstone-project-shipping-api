@@ -15,11 +15,8 @@ from starlette.datastructures import URL, Headers
 from starlette.responses import PlainTextResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-from app.auth import TENANT_SHORT_NAME
 from app.auth.microsoft import get_json_keys
 from app.auth.profile import AccountProfile
-
-ISSUER_URL = f"https://{TENANT_SHORT_NAME}.b2clogin.com/{TENANT_SHORT_NAME}.onmicrosoft.com/v2.0"
 
 # Some warnings for debug mode, as we are not verifying the token.
 if __debug__:
@@ -42,10 +39,11 @@ class EntraOAuth2Middleware:
 
     """
 
-    def __init__(self, app: ASGIApp, tenant_id: str, client_id: str, anonymous_endpoints: Optional[list[str]] = None) -> None:
+    def __init__(self, app: ASGIApp, tenant_id: str, client_id: str, b2c_short_name: str, anonymous_endpoints: Optional[list[str]] = None) -> None:
         self.app = app
         self.tenant_id = tenant_id
         self.client_id = client_id
+        self.issuer_url = f"https://{b2c_short_name}.b2clogin.com/{tenant_id}/v2.0/"
 
         if anonymous_endpoints is None:
             anonymous_endpoints = []
@@ -111,10 +109,23 @@ class EntraOAuth2Middleware:
 
             # Convert accepted_key to PEM format
             reformed_key = RSAAlgorithm.from_jwk(accepted_key).public_bytes(
-                encoding=Encoding.PEM, format=PublicFormat.PKCS1)
+                encoding=Encoding.PEM,
+                format=PublicFormat.PKCS1
+            )
+
+            # What to verify, everything by default should be true, but these are manually set just in case.
             options = {"verify_exp": True, "verify_signature": True}
-            payload = jwt.decode(token, reformed_key, algorithms=[
-                                 "RS256"], audience=self.client_id, issuer=ISSUER_URL, options=options)
+
+            # Decoding into the JWT payload
+            payload = jwt.decode(
+                token,
+                reformed_key,
+                algorithms=["RS256"],
+                audience=self.client_id,
+                issuer=self.issuer_url,
+                options=options
+            )
+
             # Hooray, they've passed verification!
             profile = AccountProfile(payload)
             scope["b2c_profile"] = profile
@@ -127,7 +138,7 @@ class EntraOAuth2Middleware:
             response = PlainTextResponse("Token has expired.", status_code=401)
             await response(scope, receive, send)
             return
-        except jwt.InvalidTokenError:
+        except jwt.InvalidTokenError as e:
             response = PlainTextResponse("Invalid token.", status_code=401)
             await response(scope, receive, send)
             return

@@ -81,7 +81,7 @@ class ShipmentStatusPatchRequest(BaseModel):
     """
     An object to be used for patching fields on a shipment.
     """
-    message: Optional[Status] = None
+    message: Status
 
 
 class Delivery(BaseModel):

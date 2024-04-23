@@ -14,6 +14,6 @@ DATABASE_URL = environ.get(
     "DATABASE_URL", "sqlite:///shipping.db?check_same_thread=False")
 
 
-engine: Engine = create_engine(DATABASE_URL, echo=True)
+engine: Engine = create_engine(DATABASE_URL, echo=True, pool_pre_ping=True)
 Session = sessionmaker(engine)
 session = Session()

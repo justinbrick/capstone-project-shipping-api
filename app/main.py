@@ -14,7 +14,7 @@ if __name__ == "__main__":
     import dotenv
     dotenv.load_dotenv()
 
-from app.auth import CLIENT_ID, TENANT_ID
+from app.auth import CLIENT_ID, TENANT_ID, TENANT_SHORT_NAME
 from app.auth.dependencies import has_roles
 from app.database import engine
 from app.database.schemas import Base
@@ -35,6 +35,7 @@ app.add_middleware(
     EntraOAuth2Middleware,
     client_id=CLIENT_ID,
     tenant_id=TENANT_ID,
+    b2c_short_name=TENANT_SHORT_NAME,
     anonymous_endpoints=anonymous_endpoints
 )
 # Routers

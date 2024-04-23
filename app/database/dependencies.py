@@ -6,7 +6,7 @@ FastAPI Dependencies for database
 from app.database import Session
 
 
-def get_db():
+async def get_db():
     """
     Creates a database session from the database engine.
 
