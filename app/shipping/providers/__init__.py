@@ -29,12 +29,35 @@ class ShipmentProvider(ABC):
     """The price multiplier for the provider - used to approximate shipping costs."""
 
     @abstractmethod
-    async def get_shipment_status(self, tracking_identifier: str) -> ShipmentStatus:
+    async def get_shipment_status(self, shipment: str) -> ShipmentStatus:
         """
         Get the status of a shipment using a tracking identifier.
-        :param tracking_identifier: the tracking identifier to get the status for
-        :return: the status of the shipment
+        :param shipment: the shipment to get the status for
+        :return: the estimated status of the shipment
         """
+        deliveryEstimate = get_current_delivery_progress_estimate(shipment)
+
+        if deliveryEstimate == 1.0:
+            return ShipmentStatus(
+                shipment_id=shipment.shipment_id,
+                expected_at=shipment.status.expected_at,
+                updated_at=datetime.now(),
+                message=Status.DELIVERED
+            )
+        if deliveryEstimate == 0.0:
+            return ShipmentStatus(
+                shipment_id=shipment.shipment_id,
+                expected_at=shipment.status.expected_at,
+                updated_at=datetime.now(),
+                message=Status.PENDING
+            )
+        else:
+            return ShipmentStatus(
+                shipment_id=shipment.shipment_id,
+                expected_at=shipment.status.expected_at,
+                updated_at=datetime.now(),
+                message=Status.IN_TRANSIT
+            )
 
     async def get_shipment_location(self, tracking_identifier: str) -> str | None:
         """

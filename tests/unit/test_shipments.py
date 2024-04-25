@@ -8,11 +8,11 @@ from uuid import UUID
 
 import pytest
 from sqlalchemy.orm.session import Session
-
 from app.auth.profile import AccountProfile
 from app.parameters.shipment import FullShipmentQueryParams
 from app.routers.shipments import (get_shipment, get_shipments,
                                    update_shipment_status)
+from app.shipping.delivery import get_shipment_status
 from app.shipping.enums import Status
 from app.shipping.models import ShipmentStatusPatchRequest
 
@@ -63,8 +63,8 @@ async def test_update_shipment_status(shipment_id: UUID, session: Session, accou
     Test updating the shipment status.
     """
     # TODO: Needs get_shipment_status to be implemented on shipment providers.
-    # shipment = await get_shipment_status(shipment_id, session)
-    # assert shipment.status == "PENDING"
+    shipment = await get_shipment_status(shipment_id, session)
+    assert shipment.status == "PENDING"
 
     new_status = ShipmentStatusPatchRequest(
         message=Status.SHIPPED
