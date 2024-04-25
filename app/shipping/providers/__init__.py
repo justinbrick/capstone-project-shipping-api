@@ -28,7 +28,6 @@ class ShipmentProvider(ABC):
     price_mult: float
     """The price multiplier for the provider - used to approximate shipping costs."""
 
-    @abstractmethod
     async def get_shipment_status(self, shipment_id: str) -> ShipmentStatus:
         """
         Get the status of a shipment using a tracking identifier.

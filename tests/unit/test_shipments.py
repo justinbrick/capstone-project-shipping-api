@@ -12,7 +12,7 @@ from app.auth.profile import AccountProfile
 from app.parameters.shipment import FullShipmentQueryParams
 from app.routers.shipments import (get_shipment, get_shipments,
                                    update_shipment_status)
-from app.shipping.delivery import get_shipment_status
+from app.shipping.providers import get_shipment_status
 from app.shipping.enums import Status
 from app.shipping.models import ShipmentStatusPatchRequest
 
